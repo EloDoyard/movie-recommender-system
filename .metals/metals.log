@@ -1,0 +1,425 @@
+2022.02.28 09:21:23 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/.metals/lsp.trace.json or /Users/alessio/Library/Caches/org.scalameta.metals/lsp.trace.json
+2022.02.28 09:21:23 INFO  logging to file /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/.metals/metals.log
+2022.02.28 09:21:23 INFO  Started: Metals version 0.11.1 in workspace '/Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1' for client Visual Studio Code 1.64.2.
+2022.02.28 09:21:23 INFO  Parse release: 1.8.0_321
+2022.02.28 09:21:23 WARN  Can't instantiate JavaInteractiveSemanticdb (version: Some(JdkVersion(1,8)), jdkHome: /Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home, javac exists: false)
+2022.02.28 09:21:24 INFO  time: initialize in 0.48s
+2022.02.28 09:21:24 WARN  Build server is not auto-connectable.
+2022.02.28 09:21:24 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/recommend/Recommender.scala
+2022.02.28 09:21:37 INFO  no build target found for /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/recommend/Recommender.scala. Using presentation compiler with project's scala-library version: 3.1.0
+2022.02.28 09:21:39 INFO  time: code lens generation in 1.71s
+2022.02.28 09:21:39 INFO  time: code lens generation in 1.25s
+2022.02.28 09:21:39 INFO  time: code lens generation in 1.73s
+2022.02.28 09:21:39 INFO  time: code lens generation in 1.74s
+2022.02.28 09:21:39 INFO  time: code lens generation in 1.78s
+2022.02.28 09:21:39 INFO  time: code lens generation in 1.75s
+2022.02.28 09:21:39 INFO  time: code lens generation in 1.78s
+2022.02.28 09:21:39 INFO  time: code lens generation in 1.79s
+2022.02.28 09:21:39 INFO  time: code lens generation in 1.82s
+2022.02.28 09:21:39 INFO  time: code lens generation in 1.81s
+2022.02.28 09:21:39 INFO  time: code lens generation in 14s
+2022.02.28 09:21:39 INFO  time: code lens generation in 1.81s
+2022.02.28 09:40:04 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 09:42:10 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/build.sbt
+2022.02.28 09:49:45 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 09:59:22 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:00:00 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:00:22 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:03:25 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:06:00 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/shared/predictions.scala
+Feb 28, 2022 10:07:52 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 694
+2022.02.28 10:08:53 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:14:58 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:23:17 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:23:17 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:26:03 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+Feb 28, 2022 10:28:37 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint fallbackResponseError
+SEVERE: Internal error: java.lang.reflect.InvocationTargetException
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.lambda$null$0(GenericEndpoint.java:67)
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.request(GenericEndpoint.java:120)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.handleRequest(RemoteEndpoint.java:261)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.consume(RemoteEndpoint.java:190)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.handleMessage(StreamMessageProducer.java:194)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.listen(StreamMessageProducer.java:94)
+	at org.eclipse.lsp4j.jsonrpc.json.ConcurrentMessageProcessor.run(ConcurrentMessageProcessor.java:113)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:750)
+Caused by: java.lang.reflect.InvocationTargetException
+	at sun.reflect.GeneratedMethodAccessor3.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.lambda$null$0(GenericEndpoint.java:65)
+	... 11 more
+Caused by: java.lang.IllegalArgumentException: 124 is not a valid line number, allowed [0..123]
+	at scala.meta.internal.inputs.InternalInput.lineToOffset(InternalInput.scala:37)
+	at scala.meta.internal.inputs.InternalInput.lineToOffset$(InternalInput.scala:32)
+	at scala.meta.inputs.Input$VirtualFile.lineToOffset(Input.scala:80)
+	at scala.meta.inputs.Position$Range$.apply(Position.scala:59)
+	at scala.meta.internal.mtags.MtagsEnrichments$XtensionPositionLspInverse.toMeta(MtagsEnrichments.scala:133)
+	at scala.meta.internal.parsing.Trees.$anonfun$findLastEnclosingAt$4(Trees.scala:77)
+	at scala.Option.flatMap(Option.scala:271)
+	at scala.meta.internal.parsing.Trees.findLastEnclosingAt(Trees.scala:76)
+	at scala.meta.internal.metals.codeactions.PatternMatchRefactor.contribute(PatternMatchRefactor.scala:96)
+	at scala.meta.internal.metals.CodeActionProvider$$anonfun$1.applyOrElse(CodeActionProvider.scala:64)
+	at scala.meta.internal.metals.CodeActionProvider$$anonfun$1.applyOrElse(CodeActionProvider.scala:63)
+	at scala.collection.immutable.List.collect(List.scala:323)
+	at scala.meta.internal.metals.CodeActionProvider.codeActions(CodeActionProvider.scala:63)
+	at scala.meta.internal.metals.MetalsLanguageServer.$anonfun$codeAction$1(MetalsLanguageServer.scala:1592)
+	at scala.meta.internal.metals.CancelTokens$.future(CancelTokens.scala:38)
+	at scala.meta.internal.metals.MetalsLanguageServer.codeAction(MetalsLanguageServer.scala:1591)
+	... 15 more
+
+2022.02.28 10:28:38 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:29:58 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:47:44 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/build.sbt
+Feb 28, 2022 10:54:43 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 2903
+2022.02.28 10:54:58 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+Feb 28, 2022 10:55:30 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint fallbackResponseError
+SEVERE: Internal error: java.lang.reflect.InvocationTargetException
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.lambda$null$0(GenericEndpoint.java:67)
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.request(GenericEndpoint.java:120)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.handleRequest(RemoteEndpoint.java:261)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.consume(RemoteEndpoint.java:190)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.handleMessage(StreamMessageProducer.java:194)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.listen(StreamMessageProducer.java:94)
+	at org.eclipse.lsp4j.jsonrpc.json.ConcurrentMessageProcessor.run(ConcurrentMessageProcessor.java:113)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:750)
+Caused by: java.lang.reflect.InvocationTargetException
+	at sun.reflect.GeneratedMethodAccessor3.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.lambda$null$0(GenericEndpoint.java:65)
+	... 11 more
+Caused by: java.lang.IllegalArgumentException: 124 is not a valid line number, allowed [0..123]
+	at scala.meta.internal.inputs.InternalInput.lineToOffset(InternalInput.scala:37)
+	at scala.meta.internal.inputs.InternalInput.lineToOffset$(InternalInput.scala:32)
+	at scala.meta.inputs.Input$VirtualFile.lineToOffset(Input.scala:80)
+	at scala.meta.inputs.Position$Range$.apply(Position.scala:59)
+	at scala.meta.internal.mtags.MtagsEnrichments$XtensionPositionLspInverse.toMeta(MtagsEnrichments.scala:133)
+	at scala.meta.internal.parsing.Trees.$anonfun$findLastEnclosingAt$4(Trees.scala:77)
+	at scala.Option.flatMap(Option.scala:271)
+	at scala.meta.internal.parsing.Trees.findLastEnclosingAt(Trees.scala:76)
+	at scala.meta.internal.metals.codeactions.PatternMatchRefactor.contribute(PatternMatchRefactor.scala:96)
+	at scala.meta.internal.metals.CodeActionProvider$$anonfun$1.applyOrElse(CodeActionProvider.scala:64)
+	at scala.meta.internal.metals.CodeActionProvider$$anonfun$1.applyOrElse(CodeActionProvider.scala:63)
+	at scala.collection.immutable.List.collect(List.scala:323)
+	at scala.meta.internal.metals.CodeActionProvider.codeActions(CodeActionProvider.scala:63)
+	at scala.meta.internal.metals.MetalsLanguageServer.$anonfun$codeAction$1(MetalsLanguageServer.scala:1592)
+	at scala.meta.internal.metals.CancelTokens$.future(CancelTokens.scala:38)
+	at scala.meta.internal.metals.MetalsLanguageServer.codeAction(MetalsLanguageServer.scala:1591)
+	... 15 more
+
+Feb 28, 2022 10:55:31 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint fallbackResponseError
+SEVERE: Internal error: java.lang.IllegalArgumentException: 124 is not a valid line number, allowed [0..123]
+java.util.concurrent.CompletionException: java.lang.IllegalArgumentException: 124 is not a valid line number, allowed [0..123]
+	at java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:292)
+	at java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:308)
+	at java.util.concurrent.CompletableFuture.uniAccept(CompletableFuture.java:661)
+	at java.util.concurrent.CompletableFuture$UniAccept.tryFire(CompletableFuture.java:646)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:488)
+	at java.util.concurrent.CompletableFuture.completeExceptionally(CompletableFuture.java:1990)
+	at scala.meta.internal.metals.CancelTokens$.$anonfun$future$1(CancelTokens.scala:40)
+	at scala.meta.internal.metals.CancelTokens$.$anonfun$future$1$adapted(CancelTokens.scala:38)
+	at scala.concurrent.impl.CallbackRunnable.run(Promise.scala:64)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:750)
+Caused by: java.lang.IllegalArgumentException: 124 is not a valid line number, allowed [0..123]
+	at scala.meta.internal.inputs.InternalInput.lineToOffset(InternalInput.scala:37)
+	at scala.meta.internal.inputs.InternalInput.lineToOffset$(InternalInput.scala:32)
+	at scala.meta.inputs.Input$VirtualFile.lineToOffset(Input.scala:80)
+	at scala.meta.inputs.Position$Range$.apply(Position.scala:59)
+	at scala.meta.internal.mtags.MtagsEnrichments$XtensionPositionLspInverse.toMeta(MtagsEnrichments.scala:133)
+	at scala.meta.internal.parsing.Trees.$anonfun$findLastEnclosingAt$4(Trees.scala:77)
+	at scala.Option.flatMap(Option.scala:271)
+	at scala.meta.internal.parsing.Trees.findLastEnclosingAt(Trees.scala:76)
+	at scala.meta.internal.metals.codeactions.InsertInferredType.$anonfun$contribute$1(InsertInferredType.scala:69)
+	at scala.concurrent.Future$.$anonfun$apply$1(Future.scala:659)
+	at scala.util.Success.$anonfun$map$1(Try.scala:255)
+	at scala.util.Success.map(Try.scala:213)
+	at scala.concurrent.Future.$anonfun$map$1(Future.scala:292)
+	at scala.concurrent.impl.Promise.liftedTree1$1(Promise.scala:33)
+	at scala.concurrent.impl.Promise.$anonfun$transform$1(Promise.scala:33)
+	... 4 more
+
+Feb 28, 2022 10:55:33 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint fallbackResponseError
+SEVERE: Internal error: java.lang.reflect.InvocationTargetException
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.lambda$null$0(GenericEndpoint.java:67)
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.request(GenericEndpoint.java:120)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.handleRequest(RemoteEndpoint.java:261)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.consume(RemoteEndpoint.java:190)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.handleMessage(StreamMessageProducer.java:194)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.listen(StreamMessageProducer.java:94)
+	at org.eclipse.lsp4j.jsonrpc.json.ConcurrentMessageProcessor.run(ConcurrentMessageProcessor.java:113)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:750)
+Caused by: java.lang.reflect.InvocationTargetException
+	at sun.reflect.GeneratedMethodAccessor3.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.lambda$null$0(GenericEndpoint.java:65)
+	... 11 more
+Caused by: java.lang.IllegalArgumentException: 124 is not a valid line number, allowed [0..123]
+	at scala.meta.internal.inputs.InternalInput.lineToOffset(InternalInput.scala:37)
+	at scala.meta.internal.inputs.InternalInput.lineToOffset$(InternalInput.scala:32)
+	at scala.meta.inputs.Input$VirtualFile.lineToOffset(Input.scala:80)
+	at scala.meta.inputs.Position$Range$.apply(Position.scala:59)
+	at scala.meta.internal.mtags.MtagsEnrichments$XtensionPositionLspInverse.toMeta(MtagsEnrichments.scala:133)
+	at scala.meta.internal.parsing.Trees.$anonfun$findLastEnclosingAt$4(Trees.scala:77)
+	at scala.Option.flatMap(Option.scala:271)
+	at scala.meta.internal.parsing.Trees.findLastEnclosingAt(Trees.scala:76)
+	at scala.meta.internal.metals.codeactions.PatternMatchRefactor.contribute(PatternMatchRefactor.scala:96)
+	at scala.meta.internal.metals.CodeActionProvider$$anonfun$1.applyOrElse(CodeActionProvider.scala:64)
+	at scala.meta.internal.metals.CodeActionProvider$$anonfun$1.applyOrElse(CodeActionProvider.scala:63)
+	at scala.collection.immutable.List.collect(List.scala:323)
+	at scala.meta.internal.metals.CodeActionProvider.codeActions(CodeActionProvider.scala:63)
+	at scala.meta.internal.metals.MetalsLanguageServer.$anonfun$codeAction$1(MetalsLanguageServer.scala:1592)
+	at scala.meta.internal.metals.CancelTokens$.future(CancelTokens.scala:38)
+	at scala.meta.internal.metals.MetalsLanguageServer.codeAction(MetalsLanguageServer.scala:1591)
+	... 15 more
+
+Feb 28, 2022 10:55:34 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint fallbackResponseError
+SEVERE: Internal error: java.lang.reflect.InvocationTargetException
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.lambda$null$0(GenericEndpoint.java:67)
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.request(GenericEndpoint.java:120)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.handleRequest(RemoteEndpoint.java:261)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.consume(RemoteEndpoint.java:190)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.handleMessage(StreamMessageProducer.java:194)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.listen(StreamMessageProducer.java:94)
+	at org.eclipse.lsp4j.jsonrpc.json.ConcurrentMessageProcessor.run(ConcurrentMessageProcessor.java:113)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:750)
+Caused by: java.lang.reflect.InvocationTargetException
+	at sun.reflect.GeneratedMethodAccessor3.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.lambda$null$0(GenericEndpoint.java:65)
+	... 11 more
+Caused by: java.lang.IllegalArgumentException: 124 is not a valid line number, allowed [0..123]
+	at scala.meta.internal.inputs.InternalInput.lineToOffset(InternalInput.scala:37)
+	at scala.meta.internal.inputs.InternalInput.lineToOffset$(InternalInput.scala:32)
+	at scala.meta.inputs.Input$VirtualFile.lineToOffset(Input.scala:80)
+	at scala.meta.inputs.Position$Range$.apply(Position.scala:59)
+	at scala.meta.internal.mtags.MtagsEnrichments$XtensionPositionLspInverse.toMeta(MtagsEnrichments.scala:133)
+	at scala.meta.internal.parsing.Trees.$anonfun$findLastEnclosingAt$4(Trees.scala:77)
+	at scala.Option.flatMap(Option.scala:271)
+	at scala.meta.internal.parsing.Trees.findLastEnclosingAt(Trees.scala:76)
+	at scala.meta.internal.metals.codeactions.PatternMatchRefactor.contribute(PatternMatchRefactor.scala:96)
+	at scala.meta.internal.metals.CodeActionProvider$$anonfun$1.applyOrElse(CodeActionProvider.scala:64)
+	at scala.meta.internal.metals.CodeActionProvider$$anonfun$1.applyOrElse(CodeActionProvider.scala:63)
+	at scala.collection.immutable.List.collect(List.scala:323)
+	at scala.meta.internal.metals.CodeActionProvider.codeActions(CodeActionProvider.scala:63)
+	at scala.meta.internal.metals.MetalsLanguageServer.$anonfun$codeAction$1(MetalsLanguageServer.scala:1592)
+	at scala.meta.internal.metals.CancelTokens$.future(CancelTokens.scala:38)
+	at scala.meta.internal.metals.MetalsLanguageServer.codeAction(MetalsLanguageServer.scala:1591)
+	... 15 more
+
+2022.02.28 10:56:50 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:57:07 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:57:53 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:57:53 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:58:24 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:59:07 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:59:13 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 10:59:47 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:00:05 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:01:14 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:14:19 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/shared/predictions.scala
+Exception in thread "pool-3-thread-1" java.lang.ClassCastException: dotty.tools.dotc.core.Symbols$NoSymbol$ cannot be cast to dotty.tools.dotc.core.Symbols$ClassSymbol
+	at dotty.tools.dotc.core.Symbols$Symbol.asClass(Symbols.scala:172)
+	at dotty.tools.dotc.interactive.Interactive$.enclosingSourceSymbols(Interactive.scala:111)
+	at scala.meta.internal.pc.ScalaPresentationCompiler.hover$$anonfun$1(ScalaPresentationCompiler.scala:369)
+	at scala.meta.internal.pc.CompilerAccess.withSharedCompiler(CompilerAccess.scala:137)
+	at scala.meta.internal.pc.CompilerAccess.withNonInterruptableCompiler$$anonfun$1(CompilerAccess.scala:125)
+	at scala.meta.internal.pc.CompilerAccess.onCompilerJobQueue$$anonfun$1(CompilerAccess.scala:197)
+	at scala.meta.internal.pc.CompilerJobQueue$Job.run(CompilerJobQueue.scala:139)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:750)
+Exception in thread "pool-3-thread-2" java.lang.ClassCastException: dotty.tools.dotc.core.Symbols$NoSymbol$ cannot be cast to dotty.tools.dotc.core.Symbols$ClassSymbol
+	at dotty.tools.dotc.core.Symbols$Symbol.asClass(Symbols.scala:172)
+	at dotty.tools.dotc.interactive.Interactive$.enclosingSourceSymbols(Interactive.scala:111)
+	at scala.meta.internal.pc.ScalaPresentationCompiler.hover$$anonfun$1(ScalaPresentationCompiler.scala:369)
+	at scala.meta.internal.pc.CompilerAccess.withSharedCompiler(CompilerAccess.scala:137)
+	at scala.meta.internal.pc.CompilerAccess.withNonInterruptableCompiler$$anonfun$1(CompilerAccess.scala:125)
+	at scala.meta.internal.pc.CompilerAccess.onCompilerJobQueue$$anonfun$1(CompilerAccess.scala:197)
+	at scala.meta.internal.pc.CompilerJobQueue$Job.run(CompilerJobQueue.scala:139)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:750)
+2022.02.28 11:19:02 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/shared/predictions.scala
+2022.02.28 11:19:47 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/shared/predictions.scala
+Exception in thread "pool-3-thread-3" java.lang.ClassCastException: dotty.tools.dotc.core.Symbols$NoSymbol$ cannot be cast to dotty.tools.dotc.core.Symbols$ClassSymbol
+	at dotty.tools.dotc.core.Symbols$Symbol.asClass(Symbols.scala:172)
+	at dotty.tools.dotc.interactive.Interactive$.enclosingSourceSymbols(Interactive.scala:111)
+	at scala.meta.internal.pc.ScalaPresentationCompiler.hover$$anonfun$1(ScalaPresentationCompiler.scala:369)
+	at scala.meta.internal.pc.CompilerAccess.withSharedCompiler(CompilerAccess.scala:137)
+	at scala.meta.internal.pc.CompilerAccess.withNonInterruptableCompiler$$anonfun$1(CompilerAccess.scala:125)
+	at scala.meta.internal.pc.CompilerAccess.onCompilerJobQueue$$anonfun$1(CompilerAccess.scala:197)
+	at scala.meta.internal.pc.CompilerJobQueue$Job.run(CompilerJobQueue.scala:139)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:750)
+2022.02.28 11:26:17 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:27:26 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:32:27 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:32:35 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:33:14 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:33:44 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:34:05 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:34:25 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:34:30 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:37:15 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:37:21 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 11:37:29 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 15:06:53 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 15:07:14 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 15:44:57 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/.metals/lsp.trace.json or /Users/alessio/Library/Caches/org.scalameta.metals/lsp.trace.json
+2022.02.28 15:44:58 INFO  logging to file /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/.metals/metals.log
+2022.02.28 15:44:58 INFO  Started: Metals version 0.11.1 in workspace '/Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1' for client Visual Studio Code 1.64.2.
+2022.02.28 15:44:58 INFO  Parse release: 1.8.0_202
+2022.02.28 15:45:00 INFO  time: initialize in 2.48s
+2022.02.28 15:45:01 WARN  Build server is not auto-connectable.
+2022.02.28 15:45:01 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/shared/predictions.scala
+2022.02.28 15:45:01 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/recommend/Recommender.scala
+2022.02.28 15:45:01 INFO  skipping build import with status 'Requested'
+2022.02.28 15:45:05 INFO  no build target found for /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/recommend/Recommender.scala. Using presentation compiler with project's scala-library version: 3.1.0
+2022.02.28 15:45:10 INFO  time: code lens generation in 7.8s
+2022.02.28 15:45:42 INFO  shutting down Metals
+2022.02.28 16:03:09 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/.metals/lsp.trace.json or /Users/alessio/Library/Caches/org.scalameta.metals/lsp.trace.json
+2022.02.28 16:03:09 INFO  logging to file /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/.metals/metals.log
+2022.02.28 16:03:09 INFO  Started: Metals version 0.11.1 in workspace '/Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1' for client Visual Studio Code 1.64.2.
+2022.02.28 16:03:10 INFO  time: initialize in 0.87s
+2022.02.28 16:03:11 WARN  Build server is not auto-connectable.
+2022.02.28 16:03:11 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/shared/predictions.scala
+2022.02.28 16:03:11 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/recommend/Recommender.scala
+2022.02.28 16:03:11 INFO  skipping build import with status 'Requested'
+2022.02.28 16:03:12 INFO  no build target found for /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/shared/predictions.scala. Using presentation compiler with project's scala-library version: 3.1.0
+2022.02.28 16:03:15 INFO  time: code lens generation in 3.15s
+2022.02.28 16:03:26 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 16:04:40 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/test/scala/predict/BaselineTests.scala
+2022.02.28 16:08:15 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/test/scala/AllTests.scala
+2022.02.28 16:08:19 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/test/scala/predict/BaselineTests.scala
+2022.02.28 16:09:04 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/test/scala/distributed/DistributedBaselineTests.scala
+2022.02.28 16:09:10 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/test/scala/predict/kNNTests.scala
+2022.02.28 16:09:13 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/test/scala/predict/PersonalizedTests.scala
+2022.02.28 16:11:27 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/test/scala/predict/BaselineTests.scala
+2022.02.28 16:15:11 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 16:15:43 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 16:16:40 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 16:27:16 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 16:29:11 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 16:32:04 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 16:42:15 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 17:52:29 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 17:53:06 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 17:53:06 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 17:55:46 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 17:58:41 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 17:58:47 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:03:03 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:04:20 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:05:31 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:06:23 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:07:59 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:08:47 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:10:24 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:11:11 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:12:24 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:12:56 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:14:15 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:14:36 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:14:37 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:15:31 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:15:57 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:16:14 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:16:27 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:18:19 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:19:16 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:19:18 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:20:13 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:20:33 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:20:44 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:20:54 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:21:01 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:21:16 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:21:49 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:23:07 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:23:38 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:24:03 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:24:47 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:25:20 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:28:49 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:29:56 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:29:57 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:29:59 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:30:01 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:30:22 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:30:22 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:30:22 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:30:24 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:30:24 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:30:25 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:30:25 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:30:25 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:32:40 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:32:44 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:32:44 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:33:03 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:33:49 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:34:01 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:34:31 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:35:02 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:35:16 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:35:57 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:36:25 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:36:42 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:37:02 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:37:25 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:41:22 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/distributed/DistributedBaseline.scala
+2022.02.28 18:43:22 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Personalized.scala
+2022.02.28 18:43:49 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:44:00 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+Feb 28, 2022 6:44:45 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 6643
+2022.02.28 18:44:52 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:44:58 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:45:23 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:47:10 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:48:12 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:48:12 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:48:17 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:48:17 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:48:17 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:49:21 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:49:23 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:49:59 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:50:33 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:51:20 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:54:27 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:54:32 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:54:32 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:54:42 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:54:54 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/shared/predictions.scala
+2022.02.28 18:57:09 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 18:57:09 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.02.28 19:38:09 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala

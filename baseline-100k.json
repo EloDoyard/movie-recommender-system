@@ -1,0 +1,38 @@
+{
+    "Meta": {
+        "1.Train": "data/ml-100k/u2.base",
+        "2.Test": "data/ml-100k/u2.test",
+        "3.Measurements": 0
+    },
+    "B.1": {
+        "1.GlobalAvg": 3.5264625,
+        "2.User1Avg": 3.63302752293578,
+        "3.Item1Avg": 3.888268156424581,
+        "4.Item1AvgDev": 0.3027072341444875,
+        "5.PredUser1Item1": 4.046819980619529
+    },
+    "B.2": {
+        "1.GlobalAvgMAE": 0.9441038540625514,
+        "2.UserAvgMAE": 0.8244012117845623,
+        "3.ItemAvgMAE": 0.7967417398723002,
+        "4.BaselineMAE": 0.7339535357942091
+    },
+    "B.3": {
+        "1.GlobalAvg": {
+            "average (ms)": 0,
+            "stddev (ms)": 0
+        },
+        "2.UserAvg": {
+            "average (ms)": 0,
+            "stddev (ms)": 0
+        },
+        "3.ItemAvg": {
+            "average (ms)": 0,
+            "stddev (ms)": 0
+        },
+        "4.Baseline": {
+            "average (ms)": 0,
+            "stddev (ms)": 0
+        }
+    }
+}

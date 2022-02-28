@@ -29,18 +29,18 @@ package object predictions
   }
 
   def load(spark : org.apache.spark.sql.SparkSession,  path : String, sep : String) : org.apache.spark.rdd.RDD[Rating] = {
-       val file = spark.sparkContext.textFile(path)
-       return file
-         .map(l => {
-           val cols = l.split(sep).map(_.trim)
-           toInt(cols(0)) match {
-             case Some(_) => Some(Rating(cols(0).toInt, cols(1).toInt, cols(2).toDouble))
-             case None => None
-           }
-       })
-         .filter({ case Some(_) => true 
-                   case None => false })
-         .map({ case Some(x) => x 
-                case None => Rating(-1, -1, -1)})
-  }
+    val file = spark.sparkContext.textFile(path)
+    return file
+      .map(l => {
+        val cols = l.split(sep).map(_.trim)
+        toInt(cols(0)) match {
+          case Some(_) => Some(Rating(cols(0).toInt, cols(1).toInt, cols(2).toDouble))
+          case None => None
+        }
+    })
+      .filter({ case Some(_) => true 
+                case None => false })
+      .map({ case Some(x) => x 
+            case None => Rating(-1, -1, -1)})
+}
 }
