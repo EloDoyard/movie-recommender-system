@@ -40,11 +40,29 @@ object Baseline extends App {
   println("Loading test data from: " + conf.test()) 
   val test = load(spark, conf.test(), conf.separator()).collect()
 
-  val measurements = (1 to conf.num_measurements()).map(x => timingInMs(() => {
+  val measurements_glob_avg = (1 to conf.num_measurements()).map(x => timingInMs(() => {
     Thread.sleep(1000) // Do everything here from train and test
     42        // Output answer as last value
   }))
-  val timings = measurements.map(t => t._2) // Retrieve the timing measurements
+  val timings_glob_avg = measurements_glob_avg.map(t => t._2) // Retrieve the timing measurements
+
+  val measurements_user_avg = (1 to conf.num_measurements()).map(x => timingInMs(() => {
+    Thread.sleep(1000) // Do everything here from train and test
+    42        // Output answer as last value
+  }))
+  val timings_user_avg = measurements_user_avg.map(t => t._2) // Retrieve the timing measurements
+
+  val measurements_item_avg = (1 to conf.num_measurements()).map(x => timingInMs(() => {
+    Thread.sleep(1000) // Do everything here from train and test
+    42        // Output answer as last value
+  }))
+  val timings_item_avg = measurements_item_avg.map(t => t._2) // Retrieve the timing measurements
+
+  val measurements_pred = (1 to conf.num_measurements()).map(x => timingInMs(() => {
+    Thread.sleep(1000) // Do everything here from train and test
+    42        // Output answer as last value
+  }))
+  val timings_pred = measurements_pred.map(t => t._2) // Retrieve the timing measurements
 
   // Save answers as JSON
   def printToFile(content: String, 
@@ -84,20 +102,20 @@ object Baseline extends App {
         ),
         "B.3" -> ujson.Obj(
           "1.GlobalAvg" -> ujson.Obj(
-            "average (ms)" -> ujson.Num(mean(timings)), // Datatype of answer: Double
-            "stddev (ms)" -> ujson.Num(std(timings)) // Datatype of answer: Double
+            "average (ms)" -> ujson.Num(mean(timings_glob_avg)), // Datatype of answer: Double
+            "stddev (ms)" -> ujson.Num(std(timings_glob_avg)) // Datatype of answer: Double
           ),
           "2.UserAvg" -> ujson.Obj(
-            "average (ms)" -> ujson.Num(mean(timings)), // Datatype of answer: Double
-            "stddev (ms)" -> ujson.Num(std(timings)) // Datatype of answer: Double
+            "average (ms)" -> ujson.Num(mean(timings_user_avg)), // Datatype of answer: Double
+            "stddev (ms)" -> ujson.Num(std(timings_user_avg)) // Datatype of answer: Double
           ),
           "3.ItemAvg" -> ujson.Obj(
-            "average (ms)" -> ujson.Num(mean(timings)), // Datatype of answer: Double
-            "stddev (ms)" -> ujson.Num(std(timings)) // Datatype of answer: Double
+            "average (ms)" -> ujson.Num(mean(timings_item_avg)), // Datatype of answer: Double
+            "stddev (ms)" -> ujson.Num(std(timings_item_avg)) // Datatype of answer: Double
           ),
           "4.Baseline" -> ujson.Obj(
-            "average (ms)" -> ujson.Num(mean(timings)), // Datatype of answer: Double
-            "stddev (ms)" -> ujson.Num(std(timings)) // Datatype of answer: Double
+            "average (ms)" -> ujson.Num(mean(timings_pred)), // Datatype of answer: Double
+            "stddev (ms)" -> ujson.Num(std(timings_pred)) // Datatype of answer: Double
           )
         )
       )
@@ -112,32 +130,58 @@ object Baseline extends App {
   println("")
   spark.close()
 
+  def absoluteError(trueVal:Double, pred:Double):Double = (trueVal-pred).abs
+
+  def computeMAE(train:Seq[Rating])(f:(Rating=>Double)):Double= 
+    applyAndMean(train){x=>absoluteError(x.rating,f(x))}
+    /*{
+    
+    val res = train.foldLeft((0.0,0))((y,x)=>(absoluteError(x.rating, f(x))+y._1, y._2+1))
+    res._1/res._2
+  }*/
+
+  def applyAndMean(data:Seq[Rating])(f:(Rating=>Double)):Double={
+    val res = data.foldLeft((0.0,0))((y,x)=>(f(x)+y._1, y._2+1))
+    res._1/res._2
+  }
 
   def computeGlobalError(train:Seq[Rating], globAvg:Double):Double = 
-    computeMAE(train.map(x=>(globAvg, x.rating)))
+    computeMAE(train){x=>globAvg}
+    /*{
+    val res = train.foldLeft((0.0,0))((y,x)=>(absoluteError(x.rating,globAvg)+y._1, y._2+1))
+    res._1/res._2
+  }*/
 
   def computeItemsAvgError(train:Seq[Rating], itemsAvg:Map[Int,Double], globAvg:Double):Double = 
-    computeMAE(train.map(x=>(itemAvg(itemsAvg, x.item, globAvg), x.rating)))
-
+    computeMAE(train){y=>itemAvg(itemsAvg, y.item, globAvg)}
+    /*{
+    val res = train.foldLeft((0.0,0))((y,x)=>(absoluteError(x.rating,itemAvg(itemsAvg, x.item, globAvg))+y._1, y._2+1))
+    res._1/res._2
+  }*/
+    
   def computeUsersAvgError(train:Seq[Rating], usersAvg:Map[Int,Double], globAvg:Double):Double = 
-    computeMAE(train.map(x=>(userAvg(usersAvg, x.user, globAvg), x.rating)))
+    computeMAE(train){y=>userAvg(usersAvg, y.user, globAvg)}
+    /*{
+    val res = train.foldLeft((0.0,0))((y,x)=>(absoluteError(x.rating, userAvg(usersAvg, x.user, globAvg))+y._1, y._2+1))
+    res._1/res._2
+  }*/
 
-  def computeBaselineAvgError(train:Seq[Rating],usersAvg:Map[Int,Double], devs:Map[Int,Double],globAvg:Double):Double = 
-    computeMAE(train.map(x=>(predict(devs, x.user, x.item, usersAvg,globAvg), x.rating)))
-
-  def computeMAE(preds_pairs:Seq[(Double, Double)]):Double =
-    mean(preds_pairs.map{
-    case (x:Double,y:Double)=>(x-y).abs
-    })
+  def computeBaselineAvgError(train:Seq[Rating],usersAvg:Map[Int,Double], devs:Map[Int,Double],globAvg:Double):Double =
+    computeMAE(train){y=> predict(devs, y.user, y.item, usersAvg, globAvg)}
+    /*{
+    val res = train.foldLeft((0.0,0))((y,x)=>(absoluteError(x.rating, predict(devs, x.user, x.item, usersAvg,globAvg))+y._1, y._2+1))
+    res._1/res._2
+  }*/
 
   def computeAllUsersAvg(train:Seq[Rating]):Map[Int, Double] = 
-    train.groupBy(_.user).mapValues(x=>mean(x.map(_.rating)))
+    train.groupBy(_.user).mapValues(x=> applyAndMean(x){y=>y.rating})
   
   def computeAllItemsAvg(train:Seq[Rating]):Map[Int, Double] = 
-    train.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
+    train.groupBy(_.item).mapValues(x=> applyAndMean(x){y=>y.rating})
 
   def globalAvg(train:Seq[Rating]):Double = 
-    mean(train.map(_.rating))
+    applyAndMean(train){x=>x.rating}
+    //mean(train.map(_.rating))
 
   def userAvg(usersAvg:Map[Int,Double], userId:Int, globAvg:Double):Double = 
     usersAvg.getOrElse(userId, globAvg)
@@ -147,11 +191,14 @@ object Baseline extends App {
 
   def computeAllDevs(train:Seq[Rating], usAvg:Map[Int,Double]):Map[Int,Double] = {
     train.groupBy(y=>y.item)
-    .mapValues({
-      y=>mean(y.map({
+    .mapValues{
+      y=>applyAndMean(y){
         x=> (x.rating-usAvg(x.user))/scale(x.rating, usAvg(x.user))
-      }))
-    })
+      }
+      /*y=>mean(y.map({
+        x=> (x.rating-usAvg(x.user))/scale(x.rating, usAvg(x.user))
+      }))*/
+    }
   }
   
   def predict(devs:Map[Int,Double], userId:Int, itemId:Int, usAvg:Map[Int,Double], globAvg:Double):Double = {
