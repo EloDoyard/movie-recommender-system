@@ -88,7 +88,7 @@ object Baseline extends App {
           "2.User1Avg" -> ujson.Num(avgUsers(1)),  // Datatype of answer: Double
           "3.Item1Avg" -> ujson.Num(avgItems(1)),   // Datatype of answer: Double
           "4.Item1AvgDev" -> ujson.Num(devs(1)), // Datatype of answer: Double
-          "5.PredUser1Item1" -> ujson.Num(predict(devs, 1, 1, avgUsers,globalAvgVal)) // Datatype of answer: Double
+          "5.PredUser1Item1" -> ujson.Num(predict(devs, 1, 1, avgUsers, globalAvgVal)) // Datatype of answer: Double
         ),
         "B.2" -> ujson.Obj(
           "1.GlobalAvgMAE" -> ujson.Num(computeGlobalMAE(train, test)), // Datatype of answer: Double
@@ -134,25 +134,25 @@ object Baseline extends App {
   def computeItemsMAE(train: Seq[Rating], test: Seq[Rating]):Double = {
     lazy val globalAvgValue = globalAvg(train)
     val itemsAvg = computeAllItemsAvg(train)
-    computeMAE(train){y=>itemAvg(itemsAvg, y.item, globalAvgValue)}
+    computeMAE(test){y=>itemAvg(itemsAvg, y.item, globalAvgValue)}
   }
 
   def computeUsersMAE(train: Seq[Rating], test: Seq[Rating]):Double = {
     lazy val globalAvgValue = globalAvg(train)
     val usersAvg = computeAllUsersAvg(train)
-    computeMAE(train){y=>userAvg(usersAvg, y.user, globalAvgValue)}
+    computeMAE(test){y=>userAvg(usersAvg, y.user, globalAvgValue)}
   }
 
   def computeBaselineMAE(train: Seq[Rating], test: Seq[Rating]):Double = {
     lazy val globalAvgValue = globalAvg(train)
     val usersAvg = computeAllUsersAvg(train)
     val devs = computeAllDevs(train,usersAvg)
-    computeMAE(train){y=> predict(devs, y.user, y.item, usersAvg, globalAvgValue)}
+    computeMAE(test){y=> predict(devs, y.user, y.item, usersAvg, globalAvgValue)}
   }
 
   def absoluteError(trueVal: Double, pred: Double):Double = (trueVal-pred).abs
 
-  def computeMAE(train: Seq[Rating])(f: (Rating=>Double)):Double= applyAndMean(train){x=>absoluteError(x.rating,f(x))}
+  def computeMAE(data: Seq[Rating])(f: (Rating=>Double)):Double= applyAndMean(data){x=>absoluteError(x.rating,f(x))}
 
   def applyAndMean(data: Seq[Rating])(f: (Rating=>Double)):Double={
     val res = data.foldLeft((0.0,0))((y,x)=>(f(x)+y._1, y._2+1))
