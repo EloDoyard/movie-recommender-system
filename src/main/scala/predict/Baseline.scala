@@ -150,9 +150,7 @@ object Baseline extends App {
     computeMAE(test){y=> predict(devs, y.user, y.item, usersAvg, globalAvgValue)}
   }
 
-  def absoluteError(trueVal: Double, pred: Double):Double = (trueVal-pred).abs
-
-  def computeMAE(data: Seq[Rating])(f: (Rating=>Double)):Double= applyAndMean(data){x=>absoluteError(x.rating,f(x))}
+  def computeMAE(data: Seq[Rating])(f: (Rating=>Double)):Double= applyAndMean(data){ x => (x.rating-f(x)).abs }
 
   def applyAndMean(data: Seq[Rating])(f: (Rating=>Double)):Double={
     val res = data.foldLeft((0.0,0))((y,x)=>(f(x)+y._1, y._2+1))
