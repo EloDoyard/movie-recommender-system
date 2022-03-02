@@ -481,3 +481,5 @@ WARNING: Unmatched cancel notification for request id 10632
 2022.03.01 17:43:21 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
 2022.03.01 17:46:06 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
 2022.03.01 17:46:13 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.03.01 18:10:39 WARN  no build target for: /Users/alessio/Document/EPFL/MA2/SystemsDS/cs449-Template-M1/src/main/scala/predict/Baseline.scala
+2022.03.01 20:58:29 INFO  shutting down Metals
