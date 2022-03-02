@@ -72,11 +72,6 @@ object Baseline extends App {
   conf.json.toOption match {
     case None => ; 
     case Some(jsonFile) => {
-      val avgUsers = computeAllUsersAvg(train)
-      val avgItems = computeAllItemsAvg(train)
-      val globalAvgVal = globalAvg(train)
-      val devs = computeAllDevs(train,avgUsers)
-
       var answers = ujson.Obj(
         "Meta" -> ujson.Obj(
           "1.Train" -> ujson.Str(conf.train()),
@@ -84,11 +79,11 @@ object Baseline extends App {
           "3.Measurements" -> ujson.Num(conf.num_measurements())
         ),
         "B.1" -> ujson.Obj(
-          "1.GlobalAvg" -> ujson.Num(globalAvgVal), 
-          "2.User1Avg" -> ujson.Num(avgUsers(1)),  
-          "3.Item1Avg" -> ujson.Num(avgItems(1)),   
-          "4.Item1AvgDev" -> ujson.Num(devs(1)), 
-          "5.PredUser1Item1" -> ujson.Num(predict(devs, 1, 1, avgUsers, globalAvgVal)) 
+          "1.GlobalAvg" -> ujson.Num(globalAvg(train)), 
+          "2.User1Avg" -> ujson.Num(userAvg(computeAllUsersAvg(train), 1, globalAvg(train))),  
+          "3.Item1Avg" -> ujson.Num(itemAvg(computeAllItemsAvg(train), 1, globalAvg(train))),   
+          "4.Item1AvgDev" -> ujson.Num(computeAllDevs(train, computeAllUsersAvg(train))(1)), 
+          "5.PredUser1Item1" -> ujson.Num(predict(computeAllDevs(train, computeAllUsersAvg(train)), 1, 1, computeAllUsersAvg(train), globalAvg(train))) 
         ),
         "B.2" -> ujson.Obj(
           "1.GlobalAvgMAE" -> ujson.Num(computeGlobalMAE(train, test)), 
