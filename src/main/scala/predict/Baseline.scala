@@ -153,13 +153,23 @@ object Baseline extends App {
   def computeMAE(data: Seq[Rating])(f: (Rating=>Double)):Double= applyAndMean(data){ x => (x.rating-f(x)).abs }
 
   def applyAndMean(data: Seq[Rating])(f: (Rating=>Double)):Double={
-    val res = data.foldLeft((0.0,0))((y,x)=>(f(x)+y._1, y._2+1))
+    val res = data.foldLeft((0.0,0))((acc,x)=>(f(x)+acc._1, acc._2+1))
     res._1/res._2
   }
 
-  def computeAllUsersAvg(data: Seq[Rating]):Map[Int, Double] = data.groupBy(_.user).mapValues(x=> applyAndMean(x){y=>y.rating})
+  def groupByApplyMean(data: Seq[Rating], key: (Rating=>Int))(f: (Rating=>Double)): Map[Int,Double] = 
+    data.foldLeft(Map[Int, (Double, Int)]()){
+      (acc, x)=>{
+        val cur = acc.getOrElse(key(x), (0.0, 0))
+        acc + (key(x) -> (cur._1+f(x), cur._2+1))
+      }
+    }.mapValues{
+      x=>x._1/x._2
+    }
+
+  def computeAllUsersAvg(data: Seq[Rating]):Map[Int, Double] =  groupByApplyMean(data, x=>x.user){y=>y.rating}
   
-  def computeAllItemsAvg(data: Seq[Rating]):Map[Int, Double] = data.groupBy(_.item).mapValues(x=> applyAndMean(x){y=>y.rating})
+  def computeAllItemsAvg(data: Seq[Rating]):Map[Int, Double] = groupByApplyMean(data, x=>x.item){y=>y.rating}
 
   def globalAvg(data: Seq[Rating]):Double = applyAndMean(data){x=>x.rating}
 
@@ -167,22 +177,20 @@ object Baseline extends App {
 
   def itemAvg(itemsAvg: Map[Int,Double], itemId: Int, globAvg: => Double):Double = itemsAvg.getOrElse(itemId, globAvg)
 
-  def computeAllDevs(data: Seq[Rating], usAvg: Map[Int,Double]):Map[Int,Double] = {
-    data.groupBy(_.item)
-    .mapValues{
-      y =>applyAndMean(y){
-        x => (x.rating-usAvg(x.user))/scale(x.rating, usAvg(x.user))
-      }
+  def computeAllDevs(data: Seq[Rating], usAvg: Map[Int,Double]): Map[Int,Double] = groupByApplyMean(data, x=>x.item){
+    x=>{
+        val avg = usAvg(x.user)
+        (x.rating-avg)/scale(x.rating, avg)
     }
   }
-  
+
   def predict(devs: Map[Int,Double], userId: Int, itemId: Int, usAvg: Map[Int,Double], globAvg: => Double):Double = {
-    val dev = devs.getOrElse(itemId,0.0)
+    val dev = devs.getOrElse(itemId, 0.0)
     val avg = usAvg.getOrElse(userId, globAvg)
-    avg +  dev*scale(dev + avg, avg)
+    avg + dev*scale(dev + avg, avg)
   }
 
-  def scale(rat: Double, usAvg: Double):Double ={
+  def scale(rat: Double, usAvg: Double):Double = {
     if (rat > usAvg){
       5-usAvg
     }else if (rat < usAvg){
