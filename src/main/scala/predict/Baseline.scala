@@ -41,22 +41,22 @@ object Baseline extends App {
   val test = load(spark, conf.test(), conf.separator()).collect()
 
   val measurements_glob_avg = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    computeGlobalMAE(train, test)
+    MAE(test, globalAvgPredictor(train))
   }))
   val timings_glob_avg = measurements_glob_avg.map(t => t._2)
 
   val measurements_user_avg = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    computeUsersMAE(train, test)
+    MAE(test, userAvgPredictor(train))
   }))
   val timings_user_avg = measurements_user_avg.map(t => t._2)
 
   val measurements_item_avg = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    computeItemsMAE(train, test)
+    MAE(test, itemAvgPredictor(train))
   }))
   val timings_item_avg = measurements_item_avg.map(t => t._2)
 
   val measurements_pred = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    computeBaselineMAE(train, test)
+    MAE(test, formulaPredictor(train))
   }))
   val timings_pred = measurements_pred.map(t => t._2)
 
@@ -80,16 +80,16 @@ object Baseline extends App {
         ),
         "B.1" -> ujson.Obj(
           "1.GlobalAvg" -> ujson.Num(globalAvg(train)), 
-          "2.User1Avg" -> ujson.Num(userAvg(computeAllUsersAvg(train), 1, globalAvg(train))),  
-          "3.Item1Avg" -> ujson.Num(itemAvg(computeAllItemsAvg(train), 1, globalAvg(train))),   
+          "2.User1Avg" -> ujson.Num(userAvgPredictor(train)(1,0)),  
+          "3.Item1Avg" -> ujson.Num(itemAvgPredictor(train)(0,1)),   
           "4.Item1AvgDev" -> ujson.Num(computeAllDevs(train, computeAllUsersAvg(train))(1)), 
-          "5.PredUser1Item1" -> ujson.Num(predict(computeAllDevs(train, computeAllUsersAvg(train)), 1, 1, computeAllUsersAvg(train), globalAvg(train))) 
+          "5.PredUser1Item1" -> ujson.Num(formulaPredictor(train)(1,1))
         ),
         "B.2" -> ujson.Obj(
-          "1.GlobalAvgMAE" -> ujson.Num(computeGlobalMAE(train, test)), 
-          "2.UserAvgMAE" -> ujson.Num(computeUsersMAE(train, test)),  
-          "3.ItemAvgMAE" -> ujson.Num(computeItemsMAE(train, test)),   
-          "4.BaselineMAE" -> ujson.Num(computeBaselineMAE(train, test))  
+          "1.GlobalAvgMAE" -> ujson.Num(MAE(test, globalAvgPredictor(train))), 
+          "2.UserAvgMAE" -> ujson.Num(MAE(test, userAvgPredictor(train))),  
+          "3.ItemAvgMAE" -> ujson.Num(MAE(test, itemAvgPredictor(train))),   
+          "4.BaselineMAE" -> ujson.Num(MAE(test, formulaPredictor(train)))  
         ),
         "B.3" -> ujson.Obj(
           "1.GlobalAvg" -> ujson.Obj(
@@ -121,64 +121,38 @@ object Baseline extends App {
   println("")
   spark.close()
 
-  /** Compute the MAE over the test set using the global average as prediction
-  *
-  *  @param train the train data set 
-  *  @param test the test data set
-  *  @return The MAE
-  */
-  def computeGlobalMAE(train: Seq[Rating],test: Seq[Rating]):Double = {
-    val globalAvgValue = globalAvg(train)
-    computeMAE(test){x=>globalAvgValue}
+  def MAE(data: Seq[Rating], predict: (Int, Int)=> Double): Double = {
+    applyAndMean(data){
+      x => (x.rating-predict(x.user, x.item)).abs
+    }
   }
 
-  /** Compute the MAE over the test set using the item average as prediction
-  *
-  *  @param train the train data set 
-  *  @param test the test data set
-  *  @return The MAE
-  */
-  def computeItemsMAE(train: Seq[Rating], test: Seq[Rating]):Double = {
-    // Computed only if needed
+  def globalAvgPredictor(train: Seq[Rating]): (Int, Int) => Double = {
+    val globalAvgValue = globalAvg(train)
+    (user, item) => globalAvgValue
+  }
+
+  def userAvgPredictor(train: Seq[Rating]): (Int, Int) => Double = {
+    lazy val globalAvgValue = globalAvg(train)
+    val usersAvg = computeAllUsersAvg(train)
+    (user, item) => userAvg(usersAvg, user, globalAvgValue)
+  }
+
+  def itemAvgPredictor(train: Seq[Rating]): (Int, Int) => Double = {
     lazy val globalAvgValue = globalAvg(train)
     val itemsAvg = computeAllItemsAvg(train)
 
-    computeMAE(test){
-      y => itemAvg(itemsAvg, y.item, globalAvgValue)
-    }
+    (user, item) => itemAvg(itemsAvg, item, globalAvgValue)
   }
 
-  /** Compute the MAE over the test set using the user average as prediction
-  *
-  *  @param train the train data set 
-  *  @param test the test data set
-  *  @return The MAE
-  */
-  def computeUsersMAE(train: Seq[Rating], test: Seq[Rating]):Double = {
-    // Computed only if needed
-    lazy val globalAvgValue = globalAvg(train)
-    val usersAvg = computeAllUsersAvg(train)
-    computeMAE(test){
-      y => userAvg(usersAvg, y.user, globalAvgValue)
-    }
-  }
-
-  /** Compute the MAE over the test set using the prediction formula
-  *
-  *  @param train the train data set 
-  *  @param test the test data set
-  *  @return The MAE
-  */
-  def computeBaselineMAE(train: Seq[Rating], test: Seq[Rating]):Double = {
-    // Computed only if needed
+  def formulaPredictor(train: Seq[Rating]): (Int, Int) => Double = {
+     // Computed only if needed
     lazy val globalAvgValue = globalAvg(train)
 
     val usersAvg = computeAllUsersAvg(train)
     val devs = computeAllDevs(train, usersAvg)
 
-    computeMAE(test){
-      y => predict(devs, y.user, y.item, usersAvg, globalAvgValue)
-    }
+    (user, item) => predict(devs, user, item, usersAvg, globalAvgValue)
   }
 
   /** Compute the Mean Absolute Error between the actual rating and the computed one (using the given formula)
@@ -263,7 +237,7 @@ object Baseline extends App {
   *  @param usAvg map between user and his.her average rating in the training data set 
   *  @return map between items and their deviance
   */
-  def computeAllDevs(data: Seq[Rating], usAvg: Map[Int,Double]): Map[Int,Double] = groupByApplyMean(data, x=>x.item){
+  def computeAllDevs(data: Seq[Rating], usAvg: Map[Int,Double]): Map[Int, Double] = groupByApplyMean(data, x=>x.item){
     x => {
         val avg = usAvg(x.user)
         (x.rating-avg)/scale(x.rating, avg)
