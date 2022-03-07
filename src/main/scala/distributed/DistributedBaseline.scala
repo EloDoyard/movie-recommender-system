@@ -67,9 +67,9 @@ object DistributedBaseline extends App {
           "4.Measurements" -> conf.num_measurements()
         ),
         "D.1" -> ujson.Obj(
-          "1.GlobalAvg" -> ujson.Num(0.0), // Datatype of answer: Double
-          "2.User1Avg" -> ujson.Num(0.0),  // Datatype of answer: Double
-          "3.Item1Avg" -> ujson.Num(0.0),   // Datatype of answer: Double
+          "1.GlobalAvg" -> ujson.Num(computeGlobalAvg(train)), // Datatype of answer: Double
+          "2.User1Avg" -> ujson.Num(computeUserAvg(train, 1)),  // Datatype of answer: Double
+          "3.Item1Avg" -> ujson.Num(computeItemAvg(train, 1)),   // Datatype of answer: Double
           "4.Item1AvgDev" -> ujson.Num(0.0), // Datatype of answer: Double,
           "5.PredUser1Item1" -> ujson.Num(0.0), // Datatype of answer: Double
           "6.Mae" -> ujson.Num(0.0) // Datatype of answer: Double
@@ -91,4 +91,18 @@ object DistributedBaseline extends App {
 
   println("")
   spark.close()
+
+  def applyAndAverage(data: RDD[Rating])(f: (Rating => Double)): Double = {
+    val acc = data.map(x => (f(x), 1)).reduce( (x,y) => (x._1 + y._1, x._2 + y._2))
+    acc._1/acc._2
+  }
+  
+
+  def computeGlobalAvg(data: RDD[Rating]): Double = applyAndAverage(data)(_.rating)
+  
+  def computeUserAvg(data: RDD[Rating], userId: Int):Double = applyAndAverage(data.filter(_.user == userId))(_.rating)
+
+  def computeItemAvg(data: RDD[Rating], itemId: Int):Double = applyAndAverage(data.filter(_.item == itemId))(_.rating)
+
+  //TODO def computeItemDev(data: RDD[Rating], itemId: Int):Double = applyAndAverage(data.filter(_.item == itemId))
 }

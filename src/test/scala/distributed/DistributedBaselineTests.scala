@@ -11,6 +11,8 @@ import org.apache.log4j.Level
 
 import shared.predictions._
 import tests.shared.helpers._
+// suppl import
+import distributed.DistributedBaseline._
 
 class DistributedBaselineTests extends AnyFunSuite with BeforeAndAfterAll {
 
@@ -42,11 +44,11 @@ class DistributedBaselineTests extends AnyFunSuite with BeforeAndAfterAll {
    // src/main/scala/predict/Baseline.scala.
    // Add assertions with the answer you expect from your code, up to the 4th
    // decimal after the (floating) point, on data/ml-100k/u2.base (as loaded above).
-   test("Compute global average")                           { assert(within(1.0, 0.0, 0.0001)) }
-   test("Compute user 1 average")                           { assert(within(1.0, 0.0, 0.0001)) }
-   test("Compute item 1 average")                           { assert(within(1.0, 0.0, 0.0001)) }
-   test("Compute item 1 average deviation")                 { assert(within(1.0, 0.0, 0.0001)) }
-   test("Compute baseline prediction for user 1 on item 1") { assert(within(1.0, 0.0, 0.0001)) }
+   test("Compute global average")                           { assert(within(computeGlobalAvg(train2), 3.5264, 3.5264+ 0.0001)) }
+   test("Compute user 1 average")                           { assert(within(computeUserAvg(train2, 1), 3.6330, 3.6330+0.0001)) }
+   test("Compute item 1 average")                           { assert(within(computeItemAvg(train2, 1), 3.8882, 3.8882+0.0001)) }
+   test("Compute item 1 average deviation")                 { assert(within(1.0, 0.3027, 0.3027+0.0001)) }
+   test("Compute baseline prediction for user 1 on item 1") { assert(within(1.0, 4.0468, 4.0468+0.0001)) }
 
    // Show how to compute the MAE on all four non-personalized methods:
    // 1. There should be four different functions, one for each method, to create a predictor

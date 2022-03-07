@@ -10,3 +10,4 @@ src/main/scala/project/
 src/main/scala/target/
 target/
 logs/
+.idea/
