@@ -11,9 +11,6 @@ import org.apache.log4j.Level
 import scala.math
 import shared.predictions._
 
-// custom import
-import predict.Baseline._
-
 
 class PersonalizedConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val train = opt[String](required = true)

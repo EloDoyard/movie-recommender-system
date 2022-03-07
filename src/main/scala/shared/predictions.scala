@@ -1,4 +1,6 @@
 package shared
+import org.apache.spark.rdd.RDD
+import scala.math
 
 package object predictions
 {
@@ -48,30 +50,52 @@ package object predictions
   * Baseline related functions
   */
 
+  /**
+  * Compute the MAE on the given data set 
+  * @param data the data set on which to compute the MAE
+  * @param predict function used to make a prediction for the rating
+  * @return the MAE
+  */
   def MAE(data: Seq[Rating], predict: (Int, Int)=> Double): Double = {
     applyAndMean(data){
       x => (x.rating-predict(x.user, x.item)).abs
     }
   }
 
+  /** Compute every component to produce rating based on the global average
+  *  @param train the data set to use to make predictions 
+  *  @return Function mapping an user and item to a rating
+  */
   def globalAvgPredictor(train: Seq[Rating]): (Int, Int) => Double = {
     val globalAvgValue = globalAvg(train)
     (user, item) => globalAvgValue
   }
 
+  /** Compute every component to produce rating based on the user average
+  *  @param train the data set to use to make predictions 
+  *  @return Function mapping an user and item to a rating
+  */
   def userAvgPredictor(train: Seq[Rating]): (Int, Int) => Double = {
     lazy val globalAvgValue = globalAvg(train)
     val usersAvg = computeAllUsersAvg(train)
-    (user, item) => userAvg(usersAvg, user, globalAvgValue)
+    (user, item) => usersAvg.getOrElse(user, globalAvgValue)
   }
 
+  /** Compute every component to produce rating based on the item average
+  *  @param train the data set to use to make predictions 
+  *  @return Function mapping an user and item to a rating
+  */
   def itemAvgPredictor(train: Seq[Rating]): (Int, Int) => Double = {
     lazy val globalAvgValue = globalAvg(train)
     val itemsAvg = computeAllItemsAvg(train)
 
-    (user, item) => itemAvg(itemsAvg, item, globalAvgValue)
+    (user, item) => itemsAvg.getOrElse(item, globalAvgValue)
   }
 
+  /** Compute every component to produce rating based on the formula in the handout
+  *  @param train the data set to use to make predictions 
+  *  @return Function mapping an user and item to a rating
+  */
   def formulaPredictor(train: Seq[Rating]): (Int, Int) => Double = {
      // Computed only if needed
     lazy val globalAvgValue = globalAvg(train)
@@ -79,18 +103,12 @@ package object predictions
     val usersAvg = computeAllUsersAvg(train)
     val devs = computeAllDevs(train, usersAvg)
 
-    (user, item) => predict(devs, user, item, usersAvg, globalAvgValue)
-  }
-
-  /** Compute the Mean Absolute Error between the actual rating and the computed one (using the given formula)
-  *  @param data the data set on which to compute the MAE 
-  *  @param f the prediction function used
-  *  @return The MAE
-  */
-  def computeMAE(data: Seq[Rating])(f: (Rating=>Double)):Double = 
-    applyAndMean(data){
-      x => (x.rating-f(x)).abs
+    (user, item) => {
+      val dev = devs.getOrElse(item, 0.0)
+      val avg = usersAvg.getOrElse(user, globalAvgValue)
+      avg + dev*scale(dev + avg, avg)
     }
+  }
 
   /** Apply a function to every element of the data set and then average
   *  @param data the data set
@@ -143,22 +161,6 @@ package object predictions
   */
   def globalAvg(data: Seq[Rating]):Double = applyAndMean(data)(_.rating)
 
-  /** Get the average rating for the requested user in the given map or the global average if the user is not in the training data set
-  *  @param usersAvg the map from user id to their average rating
-  *  @param userId the user of which we want to retrieve the rating average
-  *  @param globAvg (by value) the global average of the training data set
-  *  @return user rating average
-  */
-  def userAvg(usersAvg: Map[Int,Double], userId: Int, globAvg: => Double):Double = usersAvg.getOrElse(userId, globAvg)
-
-  /** Get the average rating for the requested item in the given map or the global average if the item is not in the training data set
-  *  @param itemsAvg the map from item id to their average rating
-  *  @param itemId the item of which we want to retrieve the rating average
-  *  @param globAvg (by value) the global average of the training data set
-  *  @return item rating average
-  */
-  def itemAvg(itemsAvg: Map[Int,Double], itemId: Int, globAvg: => Double):Double = itemsAvg.getOrElse(itemId, globAvg)
-
   /** Compute the deviation with the formula given in the handout
   *  @param data the training data set
   *  @param usAvg map between user and his.her average rating in the training data set 
@@ -169,19 +171,6 @@ package object predictions
         val avg = usAvg(x.user)
         (x.rating-avg)/scale(x.rating, avg)
     }
-  }
-
-  /** Compute the prediction with the formula given in the handout
-  *  @param devs map between an item and its previously computed deviation
-  *  @param userId the user for which we want to compute the prediction 
-  *  @param itemId the item for which we want to compute the prediction
-  *  @param usAvg map between user and his.her average rating in the training data set 
-  *  @return the predicted rating
-  */
-  def predict(devs: Map[Int,Double], userId: Int, itemId: Int, usAvg: Map[Int,Double], globAvg: => Double):Double = {
-    val dev = devs.getOrElse(itemId, 0.0)
-    val avg = usAvg.getOrElse(userId, globAvg)
-    avg + dev*scale(dev + avg, avg)
   }
 
   /** Compute the scale given in the handout 
@@ -204,11 +193,21 @@ package object predictions
   * Spark related prediction functions
   */
 
+  /** 
+  * Apply a function to every element in the data set an then compute the average
+  * @param data the data on which to compute the average
+  * @return the average value over the data set 
+  */
   def applyAndAverage(data: RDD[Rating])(f: (Rating => Double)): Double = {
     val acc = data.map(x => (f(x), 1)).reduce( (x,y) => (x._1 + y._1, x._2 + y._2))
     acc._1/acc._2
   }
 
+  /** 
+  * Compute every component to produce rating based on the formula in the handout
+  *  @param train the data set to use to make predictions 
+  *  @return Function mapping an user and item to a rating
+  */
   def predictorFunctionSpark(data: RDD[Rating]):(Int, Int )=> Double = {
     val usersAvg = computeAllUsersAvgSpark(data)
     val globalAvgValue = computeGlobalAvgSpark(data)
@@ -220,35 +219,71 @@ package object predictions
     }
   }
 
+  /** Compute every component to produce rating based on the user average
+  *  @param train the data set to use to make predictions 
+  *  @return Function mapping an user and item to a rating
+  */
   def predictorUserAvgSpark(data: RDD[Rating]): (Int, Int )=> Double = {
     val usersAvg = computeAllUsersAvgSpark(data)
     lazy val globalAvgValue = computeGlobalAvgSpark(data)
     (user, item) => usersAvg.getOrElse(user, globalAvgValue)
   }
 
+  /** Compute every component to produce rating based on the item average
+  *  @param train the data set to use to make predictions 
+  *  @return Function mapping an user and item to a rating
+  */
   def predictorItemAvgSpark(data: RDD[Rating]): (Int, Int)=> Double = {
     val itemsAvg = computeItemAvgSpark(data)
     lazy val globalAvgValue = computeGlobalAvgSpark(data)
     (user, item) => itemsAvg.getOrElse(item, globalAvgValue)
   }
 
+  /** Compute every component to produce rating based on the global average
+  *  @param train the data set to use to make predictions 
+  *  @return Function mapping an user and item to a rating
+  */
   def predictorGlobalAvgSpark(data: RDD[Rating]): (Int, Int) => Double = {
     val globalAvgValue = computeGlobalAvgSpark(data)
     (user, item) => globalAvgValue
   }
 
-  def MAE(test: RDD[Rating], predict: (Int, Int)=> Double): Double = applyAndAverage(test){x=> (x.rating-predict(x.user, x.item)).abs}
+  /**
+  * Compute the MAE on the given data set 
+  * @param data the data set on which to compute the MAE
+  * @param predict function used to make a prediction for the rating
+  * @return the MAE
+  */
+  def MAESpark(test: RDD[Rating], predict: (Int, Int)=> Double): Double = applyAndAverage(test){x=> (x.rating-predict(x.user, x.item)).abs}
 
+  /** Compute the total average over the whole dataset
+  *  @param data the data set
+  *  @return global average over the data set
+  */
   def computeGlobalAvgSpark(data: RDD[Rating]): Double = applyAndAverage(data)(_.rating)
 
+  /** Compute the average rating for each user
+  *  @param data the data set
+  *  @return map between user to her.his average rating
+  */
   def computeAllUsersAvgSpark(data: RDD[Rating]): Map[Int, Double] = data.groupBy(_.user).mapValues(y=>{
     applyAndMean(y.toSeq)(_.rating)
   }).collect().toMap
 
+
+  /** Compute the average rating for each item
+  *  @param data the data set
+  *  @return map between item to its average rating
+  */
   def computeItemAvgSpark(data: RDD[Rating]): Map[Int, Double] = data.groupBy(_.item).mapValues(y=>{
     applyAndMean(y.toSeq)(_.rating)
   }).collect().toMap
 
+  /** Compute the deviation with the formula given in the handout
+  *  @param data the training data set
+  *  @param usAvg map between user and his.her average rating in the training data set 
+  *  @return map between items and their deviance
+  */
   def computeItemDevsSpark(data: RDD[Rating], usAvg: Map[Int, Double]): Map[Int, Double] = data.groupBy(_.item).mapValues(y=>{
     applyAndMean(y.toSeq){x=>
       val avg = usAvg(x.user)
@@ -261,15 +296,6 @@ package object predictions
   /**
   * Personalized related functions
   */
-  
-  def MAE(data: Seq[Rating], predict: (Int, Int)=> Double): Double = {
-    val acc = data.foldLeft((0.0,0)){
-      (acc, x)=> {
-        (acc._1+(predict(x.user, x.item)-x.rating).abs, acc._2+1)
-      }
-    }
-    acc._1/acc._2
-  }
 
   def simOnes = (user1: Int, user2: Int) => 1.0
 

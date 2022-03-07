@@ -12,9 +12,6 @@ import shared.predictions._
 import tests.shared.helpers._
 import ujson._
 
-// Added import 
-import predict.Baseline._
-
 class BaselineTests extends AnyFunSuite with BeforeAndAfterAll {
 
    val separator = "\t"

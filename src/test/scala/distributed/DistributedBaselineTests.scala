@@ -11,8 +11,6 @@ import org.apache.log4j.Level
 
 import shared.predictions._
 import tests.shared.helpers._
-// suppl import
-import distributed.DistributedBaseline._
 
 class DistributedBaselineTests extends AnyFunSuite with BeforeAndAfterAll {
 
@@ -56,7 +54,7 @@ class DistributedBaselineTests extends AnyFunSuite with BeforeAndAfterAll {
    // 2. There should be a single reusable function to compute the MAE on the test set, given a predictor;
    // 3. There should be invocations of both to show they work on the following datasets.
    test("MAE on all four non-personalized methods on data/ml-100k/u2.base and data/ml-100k/u2.test") {
-     assert(within(MAE(test2, predictorFunctionSpark(train2)), 0.7604, 0.7604+0.0001))
+     assert(within(MAESpark(test2, predictorFunctionSpark(train2)), 0.7604, 0.7604+0.0001))
      //assert(within(1.0, 0.0, 0.0001))
      //assert(within(1.0, 0.0, 0.0001))
      //assert(within(1.0, 0.0, 0.0001))

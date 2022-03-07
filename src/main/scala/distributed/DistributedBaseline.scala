@@ -46,7 +46,7 @@ object DistributedBaseline extends App {
   val test = load(spark, conf.test(), conf.separator())
 
   val measurements = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    MAE(test, predictorFunctionSpark(train))
+    MAESpark(test, predictorFunctionSpark(train))
   }))
   val timings = measurements.map(t => t._2) // Retrieve the timing measurements
 
@@ -73,9 +73,9 @@ object DistributedBaseline extends App {
           "1.GlobalAvg" -> ujson.Num(predictorGlobalAvgSpark(train)(1,0)), 
           "2.User1Avg" -> ujson.Num(predictorUserAvgSpark(train)(1,0)),  
           "3.Item1Avg" -> ujson.Num(predictorItemAvgSpark(train)(1,1)),   
-          "4.Item1AvgDev" -> ujson.Num(computeItemDevsSpark(train,computeAllUsersAvgSpark(train))(1)), ,
+          "4.Item1AvgDev" -> ujson.Num(computeItemDevsSpark(train,computeAllUsersAvgSpark(train))(1)),
           "5.PredUser1Item1" -> ujson.Num(predictorFunctionSpark(train)(1,1)), 
-          "6.Mae" -> ujson.Num(MAE(test, predictorFunctionSpark(train))) 
+          "6.Mae" -> ujson.Num(MAESpark(test, predictorFunctionSpark(train))) 
         ),
         "D.2" -> ujson.Obj(
           "1.DistributedBaseline" -> ujson.Obj(
