@@ -11,6 +11,9 @@ import org.apache.log4j.Level
 import scala.math
 import shared.predictions._
 
+// custom import 
+import predict.Baseline._
+
 class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val train = opt[String](required = true)
   val test = opt[String](required = true)
@@ -43,8 +46,7 @@ object DistributedBaseline extends App {
   val test = load(spark, conf.test(), conf.separator())
 
   val measurements = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    Thread.sleep(1000) // Do everything here from train and test
-    42        // Output answer as last value
+    MAE(test, predictorFunctionSpark(train))
   }))
   val timings = measurements.map(t => t._2) // Retrieve the timing measurements
 
@@ -56,6 +58,7 @@ object DistributedBaseline extends App {
         f.write(content)
       } finally{ f.close }
   }
+  
   conf.json.toOption match {
     case None => ; 
     case Some(jsonFile) => {
@@ -67,12 +70,12 @@ object DistributedBaseline extends App {
           "4.Measurements" -> conf.num_measurements()
         ),
         "D.1" -> ujson.Obj(
-          "1.GlobalAvg" -> ujson.Num(computeGlobalAvg(train)), // Datatype of answer: Double
-          "2.User1Avg" -> ujson.Num(computeUserAvg(train, 1)),  // Datatype of answer: Double
-          "3.Item1Avg" -> ujson.Num(computeItemAvg(train, 1)),   // Datatype of answer: Double
-          "4.Item1AvgDev" -> ujson.Num(0.0), // Datatype of answer: Double,
-          "5.PredUser1Item1" -> ujson.Num(0.0), // Datatype of answer: Double
-          "6.Mae" -> ujson.Num(0.0) // Datatype of answer: Double
+          "1.GlobalAvg" -> ujson.Num(predictorGlobalAvgSpark(train)(1,0)), // Datatype of answer: Double
+          "2.User1Avg" -> ujson.Num(predictorUserAvgSpark(train)(1,0)),  // Datatype of answer: Double
+          "3.Item1Avg" -> ujson.Num(predictorItemAvgSpark(train)(1,1)),   // Datatype of answer: Double
+          "4.Item1AvgDev" -> ujson.Num(computeItemDevsSpark(train,computeAllUsersAvgSpark(train))(1)), // Datatype of answer: Double,
+          "5.PredUser1Item1" -> ujson.Num(predictorFunctionSpark(train)(1,1)), // Datatype of answer: Double
+          "6.Mae" -> ujson.Num(MAE(test, predictorFunctionSpark(train))) // Datatype of answer: Double
         ),
         "D.2" -> ujson.Obj(
           "1.DistributedBaseline" -> ujson.Obj(
@@ -87,6 +90,8 @@ object DistributedBaseline extends App {
       println("Saving answers in: " + jsonFile)
       printToFile(json, jsonFile)
     }
+    
+
   }
 
   println("")
@@ -96,13 +101,51 @@ object DistributedBaseline extends App {
     val acc = data.map(x => (f(x), 1)).reduce( (x,y) => (x._1 + y._1, x._2 + y._2))
     acc._1/acc._2
   }
-  
 
-  def computeGlobalAvg(data: RDD[Rating]): Double = applyAndAverage(data)(_.rating)
-  
-  def computeUserAvg(data: RDD[Rating], userId: Int):Double = applyAndAverage(data.filter(_.user == userId))(_.rating)
+  def predictorFunctionSpark(data: RDD[Rating]):(Int, Int )=> Double = {
+    val usersAvg = computeAllUsersAvgSpark(data)
+    val globalAvgValue = computeGlobalAvgSpark(data)
+    val devs = computeItemDevsSpark(data, usersAvg)
+    (user, item)=>{
+      val dev = devs.getOrElse(item, 0.0)
+      val avg = usersAvg.getOrElse(user, globalAvgValue)
+      avg + dev*scale(dev + avg, avg)
+    }
+  }
 
-  def computeItemAvg(data: RDD[Rating], itemId: Int):Double = applyAndAverage(data.filter(_.item == itemId))(_.rating)
+  def predictorUserAvgSpark(data: RDD[Rating]): (Int, Int )=> Double = {
+    val usersAvg = computeAllUsersAvgSpark(data)
+    lazy val globalAvgValue = computeGlobalAvgSpark(data)
+    (user, item) => usersAvg.getOrElse(user, globalAvgValue)
+  }
 
-  //TODO def computeItemDev(data: RDD[Rating], itemId: Int):Double = applyAndAverage(data.filter(_.item == itemId))
+  def predictorItemAvgSpark(data: RDD[Rating]): (Int, Int)=> Double = {
+    val itemsAvg = computeItemAvgSpark(data)
+    lazy val globalAvgValue = computeGlobalAvgSpark(data)
+    (user, item) => itemsAvg.getOrElse(item, globalAvgValue)
+  }
+
+  def predictorGlobalAvgSpark(data: RDD[Rating]): (Int, Int) => Double = {
+    val globalAvgValue = computeGlobalAvgSpark(data)
+    (user, item) => globalAvgValue
+  }
+
+  def MAE(test: RDD[Rating], predict: (Int, Int)=> Double): Double = applyAndAverage(test){x=> (x.rating-predict(x.user, x.item)).abs}
+
+  def computeGlobalAvgSpark(data: RDD[Rating]): Double = applyAndAverage(data)(_.rating)
+
+  def computeAllUsersAvgSpark(data: RDD[Rating]): Map[Int, Double] = data.groupBy(_.user).mapValues(y=>{
+    applyAndMean(y.toSeq)(_.rating)
+  }).collect().toMap
+
+  def computeItemAvgSpark(data: RDD[Rating]): Map[Int, Double] = data.groupBy(_.item).mapValues(y=>{
+    applyAndMean(y.toSeq)(_.rating)
+  }).collect().toMap
+
+  def computeItemDevsSpark(data: RDD[Rating], usAvg: Map[Int, Double]): Map[Int, Double] = data.groupBy(_.item).mapValues(y=>{
+    applyAndMean(y.toSeq){x=>
+      val avg = usAvg(x.user)
+      (x.rating-avg)/scale(x.rating, avg)
+    }
+  }).collect().toMap
 }

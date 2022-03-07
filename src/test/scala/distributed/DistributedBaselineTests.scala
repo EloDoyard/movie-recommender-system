@@ -44,11 +44,11 @@ class DistributedBaselineTests extends AnyFunSuite with BeforeAndAfterAll {
    // src/main/scala/predict/Baseline.scala.
    // Add assertions with the answer you expect from your code, up to the 4th
    // decimal after the (floating) point, on data/ml-100k/u2.base (as loaded above).
-   test("Compute global average")                           { assert(within(computeGlobalAvg(train2), 3.5264, 3.5264+ 0.0001)) }
-   test("Compute user 1 average")                           { assert(within(computeUserAvg(train2, 1), 3.6330, 3.6330+0.0001)) }
-   test("Compute item 1 average")                           { assert(within(computeItemAvg(train2, 1), 3.8882, 3.8882+0.0001)) }
-   test("Compute item 1 average deviation")                 { assert(within(1.0, 0.3027, 0.3027+0.0001)) }
-   test("Compute baseline prediction for user 1 on item 1") { assert(within(1.0, 4.0468, 4.0468+0.0001)) }
+   test("Compute global average")                           { assert(within(predictorGlobalAvgSpark(train2)(1,0), 3.5264, 3.5264+ 0.0001)) }
+   test("Compute user 1 average")                           { assert(within(predictorUserAvgSpark(train2)(1,0), 3.6330, 3.6330+0.0001)) }
+   test("Compute item 1 average")                           { assert(within(predictorItemAvgSpark(train2)(1,1), 3.8882, 3.8882+0.0001)) }
+   test("Compute item 1 average deviation")                 { assert(within(computeItemDevsSpark(train2,computeAllUsersAvgSpark(train2))(1), 0.3027, 0.3027+0.0001)) }
+   test("Compute baseline prediction for user 1 on item 1") { assert(within(predictorFunctionSpark(train2)(1,1), 4.0468, 4.0468+0.0001)) }
 
    // Show how to compute the MAE on all four non-personalized methods:
    // 1. There should be four different functions, one for each method, to create a predictor
@@ -56,9 +56,9 @@ class DistributedBaselineTests extends AnyFunSuite with BeforeAndAfterAll {
    // 2. There should be a single reusable function to compute the MAE on the test set, given a predictor;
    // 3. There should be invocations of both to show they work on the following datasets.
    test("MAE on all four non-personalized methods on data/ml-100k/u2.base and data/ml-100k/u2.test") {
-     assert(within(1.0, 0.0, 0.0001))
-     assert(within(1.0, 0.0, 0.0001))
-     assert(within(1.0, 0.0, 0.0001))
-     assert(within(1.0, 0.0, 0.0001))
+     assert(within(MAE(test2, predictorFunctionSpark(train2)), 0.7604, 0.7604+0.0001))
+     //assert(within(1.0, 0.0, 0.0001))
+     //assert(within(1.0, 0.0, 0.0001))
+     //assert(within(1.0, 0.0, 0.0001))
    }
 }
