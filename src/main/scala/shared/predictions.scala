@@ -373,45 +373,58 @@ package object predictions
     }
 
     val mapped = train.map(x=>(x.user, dev(x)))
-    println(mapped)
+    //println(mapped)
 
     val normByUsers = mapped.foldLeft(Map[Int,Double]()){(acc,x) =>
        val cur:Double = acc.getOrElse(x._1, 0.0)
         // Update of the map
         acc + (x._1 -> (cur+x._2*x._2))
+    }.mapValues{
+      x=> math.sqrt(x)
     }
 
     val itemsByU = ratingByUsers(train)
-    println(itemsByU)
-    println(normByUsers)
+    //println(itemsByU)
+    //println(normByUsers)
+
+    var cache = Map[(Int, Int), Double]()
 
     (user1: Int, user2: Int)=> {
-      val ratings1 = itemsByU.getOrElse(user1, Nil)
-      val ratings2 = itemsByU.getOrElse(user2, Nil)
-      if(ratings1.length==0 || ratings2.length==0) 0.0
-      else{
-        val items1 = ratings1.map(_.item)
-        val items2 = ratings2.map(_.item)
-        val inter = items1.toSet.intersect(items2.toSet)
-        println(inter)
+      val sim:Double = cache.getOrElse((user1,user2),-1.0)
+      if(sim<0){
+        val ratings1 = itemsByU.getOrElse(user1, Nil)
+        val ratings2 = itemsByU.getOrElse(user2, Nil)
+        if(ratings1.length==0 || ratings2.length==0) 0.0
+        else{
+          val items1 = ratings1.map(_.item)
+          val items2 = ratings2.map(_.item)
+          val inter = items1.toSet.intersect(items2.toSet)
 
-        val remaining2 = ratings2.foldLeft(Map[Int, Double]()){
-          (acc, x)=>{
-            if(inter.contains(x.item)){ acc + (x.item -> (dev(x)/normByUsers(user2)))}
-            else acc
-          }
-        }
-        println(remaining2)
+          val norm2 = normByUsers.getOrElse(user2, 0.0)
+          val norm1 = normByUsers.getOrElse(user1, 0.0)
 
-        ratings1.foldLeft(0.0){
-          (acc, x)=>{
-            if(inter.contains(x.item)){
-              val norm = normByUsers.getOrElse(user1, 0.0)
-              if(norm==0) acc
-              else acc + dev(x) / norm *remaining2(x.item)
-            } else acc
+          val remaining2 = ratings2.foldLeft(Map[Int, Double]()){
+            (acc, x)=>{
+              if(norm2==0.0) acc
+              else if(inter.contains(x.item)){ acc + (x.item -> (dev(x)/norm2))}
+              else acc
+            }
           }
+          //println(remaining2)
+
+          val sim:Double = ratings1.foldLeft(0.0){
+            (acc, x)=>{
+              if(inter.contains(x.item)){
+                if(norm1==0) acc
+                else acc + dev(x) / norm1 *remaining2(x.item)
+              } else acc
+            }
+          }
+          cache = (cache +((user1, user2)->sim)) + ((user2, user1)->sim)
+          sim
         }
+      }else{
+        sim
       }
     }
   }
