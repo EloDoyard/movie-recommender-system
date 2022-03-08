@@ -49,7 +49,7 @@ object Personalized extends App {
         f.write(content)
       } finally{ f.close }
   }
-  /*
+  
   conf.json.toOption match {
     case None => ; 
     case Some(jsonFile) => {
@@ -79,12 +79,7 @@ object Personalized extends App {
       println("Saving answers in: " + jsonFile)
       printToFile(json, jsonFile)
     }
-  }*/
-
-  val train2 = Seq[Rating](Rating(1,1,3.5), Rating(2,1,4), Rating(2,2,3), Rating(3,2, 5), Rating(3,1,4))
-
-  println(adjustedCosine(train2)(1,2))
-  println(predictor(train2)(adjustedCosine(train2))(1,2))
+  }
 
   println("")
   spark.close()
