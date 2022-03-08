@@ -41,8 +41,7 @@ object kNN extends App {
 
 
   val measurements = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    Thread.sleep(1000) // Do everything here from train and test
-    42        // Output answer as last value
+    MAE(test, predictor(train)(getSimilarity(train, 300, adjustedCosine(train))))
   }))
   val timings = measurements.map(t => t._2) // Retrieve the timing measurements
 
@@ -64,16 +63,16 @@ object kNN extends App {
           "3.Measurements" -> conf.num_measurements()
         ),
         "N.1" -> ujson.Obj(
-          "1.k10u1v1" -> ujson.Num(0.0), // Similarity between user 1 and user 1 (k=10)
-          "2.k10u1v864" -> ujson.Num(0.0), // Similarity between user 1 and user 864 (k=10)
-          "3.k10u1v886" -> ujson.Num(0.0), // Similarity between user 1 and user 886 (k=10)
-          "4.PredUser1Item1" -> ujson.Num(0.0) // Prediction of item 1 for user 1 (k=10)
+          "1.k10u1v1" -> ujson.Num(getSimilarity(train, 10, adjustedCosine(train))(1,1)), // Similarity between user 1 and user 1 (k=10)
+          "2.k10u1v864" -> ujson.Num(getSimilarity(train, 10, adjustedCosine(train))(1,864)), // Similarity between user 1 and user 864 (k=10)
+          "3.k10u1v886" -> ujson.Num(getSimilarity(train, 10, adjustedCosine(train))(1,886)), // Similarity between user 1 and user 886 (k=10)
+          "4.PredUser1Item1" -> ujson.Num(MAE(test, predictor(train)(getSimilarity(train, 10, adjustedCosine(train))))) // Prediction of item 1 for user 1 (k=10)
         ),
         "N.2" -> ujson.Obj(
           "1.kNN-Mae" -> List(10,30,50,100,200,300,400,800,943).map(k => 
               List(
                 k,
-                0.0 // Compute MAE
+                MAE(test, predictor(train)(getSimilarity(train, k, adjustedCosine(train))))
               )
           ).toList
         ),
@@ -94,4 +93,28 @@ object kNN extends App {
 
   println("")
   spark.close()
+
+  def getSimilarity(train: Seq[Rating], k: Int, sim: (Int, Int)=> Double): (Int, Int)=> Double = {
+    val nn = kNearestNeighbours(train, k, sim)
+    (user1: Int, user2: Int) => {
+      nn(user1).map(x=>{
+        if (x._1==user2){x._2}
+        else {0.0}
+        }).sum
+    }
+  }
+
+  def kNearestNeighbours(train: Seq[Rating], k: Int,  sim: (Int, Int)=> Double): Int => List[(Int, Double)] = {
+    val allUsers = train.map(x=>x.user).toSet
+    var map = Map[Int, List[(Int, Double)]]() // map that will act as a local cache
+    (user: Int )=>{
+      var neighbours = map.getOrElse(user, Nil)
+      if (neighbours.length == 0){
+        val allOthers = (allUsers-user).toList
+        neighbours = allOthers.map(x=> (x, sim(user, x))).sortBy(_._2)(Ordering[Double].reverse).take(k)
+        map = map +(user-> neighbours)
+      }
+      neighbours
+    }
+  }
 }
