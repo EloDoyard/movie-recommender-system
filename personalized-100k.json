@@ -9,9 +9,9 @@
         "2.OnesMAE": 0.7604467914538642
     },
     "P.2": {
-        "1.AdjustedCosineUser1User2": 0.0019030511691301637,
-        "2.PredUser1Item1": 4.041114851293827,
-        "3.AdjustedCosineMAE": 0.74019876100373
+        "1.AdjustedCosineUser1User2": 0.07303711860794568,
+        "2.PredUser1Item1": 4.087027258769361,
+        "3.AdjustedCosineMAE": 0.7372314455896454
     },
     "P.3": {
         "1.JaccardUser1User2": 0,
