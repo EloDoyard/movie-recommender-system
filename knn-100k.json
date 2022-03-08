@@ -2,7 +2,7 @@
     "Meta": {
         "1.Train": "data/ml-100k/u2.base",
         "2.Test": "data/ml-100k/u2.test",
-        "3.Measurements": 0
+        "3.Measurements": 3
     },
     "N.1": {
         "1.k10u1v1": 0,
@@ -52,8 +52,8 @@
     },
     "N.3": {
         "1.kNN": {
-            "average (ms)": 0,
-            "stddev (ms)": 0
+            "average (ms)": 27204.511129666662,
+            "stddev (ms)": 1955.827420861521
         }
     }
 }
