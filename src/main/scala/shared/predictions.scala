@@ -344,7 +344,6 @@ package object predictions
   
   def ratingByItems(data: Seq[Rating]): Map[Int, Seq[Rating]] = groupBy(data)(_.item)
 
-
   def jaccardSimCoef(data: Seq[Rating]): (Int, Int )=> Double = {
     val ratUsers = ratingByUsers(data)
 
@@ -429,4 +428,47 @@ package object predictions
     }
   }
 
+  /**
+  *
+  * KNN related functions 
+  *
+  */
+
+  /**
+  * Get the similarity of two users based on k-nearest neighbours
+  * @param train the training set on which to fit the predictor
+  * @param k the number of neighbors we want to take into account
+  * @param sim function measuring the similarity between two users
+  * @return a function returning the similarity between two users in the knn sense
+  */
+  def getSimilarity(train: Seq[Rating], k: Int, sim: (Int, Int)=> Double): (Int, Int)=> Double = {
+    val nn = kNearestNeighbours(train, k, sim)
+    (user1: Int, user2: Int) => {
+      nn(user1).map(x=>{
+        if (x._1==user2){x._2}
+        else {0.0}
+        }).sum
+    }
+  }
+
+  /**
+  * Return the list of the k nearest neighbours as well as their similarity for the given user
+  * @param train the training set on which to fit the predictor
+  * @param k the number of neighbors we want to take into account
+  * @param sim function measuring the similarity between two users
+  * @return function mapping a user id to the list of k (neigbourdid, similarity) pairs 
+  */
+  def kNearestNeighbours(train: Seq[Rating], k: Int,  sim: (Int, Int)=> Double): Int => List[(Int, Double)] = {
+    val allUsers = train.map(x=>x.user).toSet
+    var map = Map[Int, List[(Int, Double)]]() // map that will act as a local cache
+    (user: Int )=>{
+      var neighbours = map.getOrElse(user, Nil)
+      if (neighbours.length == 0){
+        val allOthers = (allUsers-user).toList
+        neighbours = allOthers.map(x=> (x, sim(user, x))).sortBy(_._2)(Ordering[Double].reverse).take(k)
+        map = map +(user-> neighbours)
+      }
+      neighbours
+    }
+  }
 }
