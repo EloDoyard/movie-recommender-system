@@ -38,10 +38,7 @@ object DistributedBaseline extends App {
   println("******************************************************")
 
   println("Loading training data from: " + conf.train()) 
-  val train = load(spark, conf.train(), conf.separator()).map(x=> {
-    if(x.rating < 1) Rating(x.user, x.item, 1.0)
-    else  Rating(x.user, x.item, x.rating)
-  }) // Fix the invalid value of the training set notably for 25M dataset.
+  val train = load(spark, conf.train(), conf.separator())
   println("Loading test data from: " + conf.test()) 
   val test = load(spark, conf.test(), conf.separator())
 

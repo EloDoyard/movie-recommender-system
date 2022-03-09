@@ -296,11 +296,23 @@ package object predictions
   /**
   * Personalized related functions
   */
-
+  /**
+  * Predictor return similarity one between any two users
+  * @param user1 the first user 
+  * @param user2 the second user
+  * @return the similarity between the two users which is always 1
+  */
   def simOnes = (user1: Int, user2: Int) => 1.0
 
+  /**
+  * Return a function taking one user and one item as input and output the predicted rating
+  * @param train the training test to compute the predictions
+  * @param sim Function outputing the similarity between two user
+  * @return Function taking one user and one item as input and output the predicted rating
+  *
+  */
   def predictor(train: Seq[Rating])(sim: ((Int, Int)=> Double)): (Int, Int)=> Double = {
-    // Compute necessary values for the predictions
+    // Compute mandatory values for the predictions
     val ratingsByItems = ratingByItems(train)
     val usAvgs = computeAllUsersAvg(train)
     val globalAvgValue = globalAvg(train)
@@ -318,6 +330,7 @@ package object predictions
         ((x.rating-avgU)/scale(x.rating, avgU), sim(user, x.user))
       })
 
+      // Compute the denominator as well as the numerator of the similarity between the two useres 
       val sumSim = simVal.foldLeft((0.0, 0.0)){
         (acc, x)=>{
           (acc._1 + x._1*x._2, acc._2 + x._2.abs)
@@ -329,96 +342,173 @@ package object predictions
     }
   }
 
-  def groupBy(data:Seq[Rating])(key: Rating => Int): Map[Int, Seq[Rating]] = 
+  /**
+  * Group the input sequence by the given key
+  * @param data the data set to group by
+  * @param key the key on which to group the value
+  * @return A map between the key and its group by value 
+  * 
+  */
+  def groupBy(data: Seq[Rating])(key: Rating => Int): Map[Int, Seq[Rating]] = 
     data.foldLeft(Map[Int, Seq[Rating]]()){
-      // The accumulator is a map mapping the key (an int) to a pair (Double, Int) corresponding to the running sum of the value we want to compute and the number of computed value respectively 
+      // The accumulator is a map mapping the key (an int) to a sequence of rating corresponding to all the groupby matching the key vlaue 
       (acc, x)=>{
-        // We access the value already stored or get 0 if no value was stored for this key
+        // We access the value already stored or get an empty list if no value was stored for this key
         val cur:Seq[Rating] = acc.getOrElse(key(x), Seq[Rating]())
         // Update of the map
         acc + (key(x) -> (x+:cur))
       }
     }
 
+  /**
+  * Get a map mapping every user to all the rating (s)he has made
+  * @param data the data we want to group by
+  * @return map mapping every user to all the rating (s)he has made
+  */
   def ratingByUsers(data: Seq[Rating]): Map[Int, Seq[Rating]] = groupBy(data)(_.user)
   
+  /**
+  * Get a map mapping every item to all the ratings made by users
+  * @param data the data we want to group by
+  * @return map mapping every item to all the ratings made by users
+  */
   def ratingByItems(data: Seq[Rating]): Map[Int, Seq[Rating]] = groupBy(data)(_.item)
 
+  /**
+  * Return a function mapping a pair of user to their similarity according to the Jaccard index
+  * @param data the data we want to group by
+  * @return a function mapping a pair of user to their similarity according to the Jaccard index
+  */
   def jaccardSimCoef(data: Seq[Rating]): (Int, Int )=> Double = {
     val ratUsers = ratingByUsers(data)
+    // Map that will be used to cache the value so that we repeated access can be speed up
+    var cache = Map[(Int, Int), Double]()
 
     (user1, user2)=>{
-      val items1 = ratUsers.getOrElse(user1, Nil).map(_.item)
-      val items2 = ratUsers.getOrElse(user2, Nil).map(_.item)
+      // Look into the cache if the similarity has already been computed
+      val sim = cache.getOrElse((user1, user2), -1)
+      if(sim < 0){
+        // If the similarity hasn't been computed yet, get all the items rated by both users
+        val items1 = ratUsers.getOrElse(user1, Nil).map(_.item)
+        val items2 = ratUsers.getOrElse(user2, Nil).map(_.item)
 
-      if(items1.length==0 || items2.length==0) 0.0
-      else{
-        val inter = items1.toSet.intersect(items2.toSet)
-        val union = items1.toSet.union(items2.toSet)
-
-        inter.size/union.size
+        
+        val  sim2 = {
+          if(items1.length==0 || items2.length==0){
+            // If the length of one list is zero, they have no item in common
+            0.0
+          }else{
+            // Compute length
+            val set1 = items1.toSet
+            val set2 = item2.toSet
+            val inter_len = set1.intersect(set2).length
+            val size1 = set1.length
+            val size2 = set2.length 
+            // Jaccard index |intersection|/|union|
+            inter_len/(size1+size2-inter_len)
+          }
+        }
+        // Update the cache 
+        cache = (cache +((user1, user2)->sim2)) + (user2, user1) -> sim2)
+        // Output the similarity
+        sim2 
+      }else{
+        sim
       }
     }
   }
 
+  /**
+  * Return a function computing the similarity according to the adjusted cosine similarity
+  * @param train the training data
+  * @return function computing the similarity according to the adjusted cosine similarity
+  */
   def adjustedCosine(train:Seq[Rating]): (Int, Int)=> Double = {
+    // Compute mandatory values
     val usAvg = computeAllUsersAvg(train)
     lazy val globalAvgValue = globalAvg(train)
 
-    // Compute the deviation according to the handout formulas
+    // Function computing the deviance according to the handout formula
     val dev = (x: Rating) => {
       val avg = usAvg.getOrElse(x.user, globalAvgValue)
       (x.rating-avg)/scale(x.rating, avg)
     }
 
+    // map every rating to the (user, deviance)
     val mapped = train.map(x=>(x.user, dev(x)))
-    //println(mapped)
 
-    val normByUsers = mapped.foldLeft(Map[Int,Double]()){(acc,x) =>
+    // Compute the norm (denominator) for each user in the dataset
+    val normByUsers = mapped.foldLeft(Map[Int,Double]()){
+      // The accumulator is a map mapping a user Id to the sum of square rating
+      (acc,x) =>
        val cur:Double = acc.getOrElse(x._1, 0.0)
         // Update of the map
         acc + (x._1 -> (cur+x._2*x._2))
     }.mapValues{
+      // Perform the square root to get the norm
       x=> math.sqrt(x)
     }
 
+    // Get all the map of all ratings by user
     val itemsByU = ratingByUsers(train)
-    //println(itemsByU)
-    //println(normByUsers)
 
+    // This map will be used as cache to avoid double computation
     var cache = Map[(Int, Int), Double]()
 
+    // The returned function
     (user1: Int, user2: Int)=> {
+      // 
       val sim:Double = cache.getOrElse((user1,user2),-1.0)
       if(sim<0){
+        // Get all the ratings for each user 
         val ratings1 = itemsByU.getOrElse(user1, Nil)
         val ratings2 = itemsByU.getOrElse(user2, Nil)
-        if(ratings1.length==0 || ratings2.length==0) 0.0
-        else{
+
+        if(ratings1.length==0 || ratings2.length==0){
+          // if one of the user didn't rate anything we output a similarity of 0
+          0.0
+        }else{
+          //Get the set of item rated by each user and compute intersection
           val items1 = ratings1.map(_.item)
           val items2 = ratings2.map(_.item)
           val inter = items1.toSet.intersect(items2.toSet)
 
+          // Get the pre-computed norm for each user or 0 if the user wasn't in the training set 
           val norm2 = normByUsers.getOrElse(user2, 0.0)
           val norm1 = normByUsers.getOrElse(user1, 0.0)
 
-          val remaining2 = ratings2.foldLeft(Map[Int, Double]()){
-            (acc, x)=>{
-              if(norm2==0.0) acc
-              else if(inter.contains(x.item)){ acc + (x.item -> (dev(x)/norm2))}
-              else acc
+          val remaining2 = {
+            if(norm2 == 0.0){
+              // if the norm is 0 we simply return an empty as we will not use the rating of this user
+              Map[Int, Double]()
+            }else{
+            ratings2.foldLeft(Map[Int, Double]()){
+              (acc, x)=>{
+                // If the item is in the intersection, map the item to the ratio deviation over norm 
+                if(inter.contains(x.item)){ acc + (x.item -> (dev(x)/norm2))}
+                else acc
+              }
             }
           }
-          //println(remaining2)
-
-          val sim:Double = ratings1.foldLeft(0.0){
-            (acc, x)=>{
-              if(inter.contains(x.item)){
-                if(norm1==0) acc
-                else acc + dev(x) / norm1 *remaining2(x.item)
-              } else acc
+          
+          // Compute the similarity according to the handout formula 
+          val sim:Double = {
+            if(norm1 == 0){
+              // if the norm is 0  we return 0 as this means that we have no ratings
+              0.0
+            }else{
+            ratings1.foldLeft(0.0){
+                (acc, x)=>{
+                  if(inter.contains(x.item)){
+                    // if the item is rated by both user we compute the weighted sum
+                    acc + dev(x) / norm1 *remaining2(x.item)
+                    //Otherwise we ignore the item.
+                  } else acc
+                }
+              }
             }
           }
+          // Cache the computed similarity
           cache = (cache +((user1, user2)->sim)) + ((user2, user1)->sim)
           sim
         }
@@ -471,4 +561,10 @@ package object predictions
       neighbours
     }
   }
+
+  /**
+  * Recommender related functions
+  *
+  */
+
 }
