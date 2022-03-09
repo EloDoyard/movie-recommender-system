@@ -2,7 +2,7 @@
     "Meta": {
         "1.Train": "data/ml-100k/u2.base",
         "2.Test": "data/ml-100k/u2.test",
-        "3.Measurements": 3
+        "3.Measurements": 0
     },
     "B.1": {
         "1.GlobalAvg": 3.5264625,
@@ -19,20 +19,20 @@
     },
     "B.3": {
         "1.GlobalAvg": {
-            "average (ms)": 10.680019000000001,
-            "stddev (ms)": 1.925097738990413
+            "average (ms)": 0,
+            "stddev (ms)": 0
         },
         "2.UserAvg": {
-            "average (ms)": 52.458317,
-            "stddev (ms)": 20.817778943329053
+            "average (ms)": 0,
+            "stddev (ms)": 0
         },
         "3.ItemAvg": {
-            "average (ms)": 26.639538,
-            "stddev (ms)": 14.038803606371973
+            "average (ms)": 0,
+            "stddev (ms)": 0
         },
         "4.Baseline": {
-            "average (ms)": 43.616103,
-            "stddev (ms)": 10.876794380004558
+            "average (ms)": 0,
+            "stddev (ms)": 0
         }
     }
 }

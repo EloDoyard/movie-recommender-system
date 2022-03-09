@@ -43,8 +43,7 @@ object DistributedBaseline extends App {
   val test = load(spark, conf.test(), conf.separator())
 
   val measurements = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    Thread.sleep(1000) // Do everything here from train and test
-    42        // Output answer as last value
+    MAESpark(test, predictorFunctionSpark(train))
   }))
   val timings = measurements.map(t => t._2) // Retrieve the timing measurements
 
@@ -56,6 +55,7 @@ object DistributedBaseline extends App {
         f.write(content)
       } finally{ f.close }
   }
+  
   conf.json.toOption match {
     case None => ; 
     case Some(jsonFile) => {
@@ -67,17 +67,17 @@ object DistributedBaseline extends App {
           "4.Measurements" -> conf.num_measurements()
         ),
         "D.1" -> ujson.Obj(
-          "1.GlobalAvg" -> ujson.Num(computeGlobalAvg(train)), // Datatype of answer: Double
-          "2.User1Avg" -> ujson.Num(computeUserAvg(train, 1)),  // Datatype of answer: Double
-          "3.Item1Avg" -> ujson.Num(computeItemAvg(train, 1)),   // Datatype of answer: Double
-          "4.Item1AvgDev" -> ujson.Num(0.0), // Datatype of answer: Double,
-          "5.PredUser1Item1" -> ujson.Num(0.0), // Datatype of answer: Double
-          "6.Mae" -> ujson.Num(0.0) // Datatype of answer: Double
+          "1.GlobalAvg" -> ujson.Num(predictorGlobalAvgSpark(train)(1,0)), 
+          "2.User1Avg" -> ujson.Num(predictorUserAvgSpark(train)(1,0)),  
+          "3.Item1Avg" -> ujson.Num(predictorItemAvgSpark(train)(1,1)),   
+          "4.Item1AvgDev" -> ujson.Num(computeItemDevsSpark(train,computeAllUsersAvgSpark(train))(1)),
+          "5.PredUser1Item1" -> ujson.Num(predictorFunctionSpark(train)(1,1)), 
+          "6.Mae" -> ujson.Num(MAESpark(test, predictorFunctionSpark(train))) 
         ),
         "D.2" -> ujson.Obj(
           "1.DistributedBaseline" -> ujson.Obj(
-            "average (ms)" -> ujson.Num(mean(timings)), // Datatype of answer: Double
-            "stddev (ms)" -> ujson.Num(std(timings)) // Datatype of answer: Double
+            "average (ms)" -> ujson.Num(mean(timings)), 
+            "stddev (ms)" -> ujson.Num(std(timings)) 
           )            
         )
       )
@@ -87,22 +87,9 @@ object DistributedBaseline extends App {
       println("Saving answers in: " + jsonFile)
       printToFile(json, jsonFile)
     }
-  }
+    
 
+  }
   println("")
   spark.close()
-
-  def applyAndAverage(data: RDD[Rating])(f: (Rating => Double)): Double = {
-    val acc = data.map(x => (f(x), 1)).reduce( (x,y) => (x._1 + y._1, x._2 + y._2))
-    acc._1/acc._2
-  }
-  
-
-  def computeGlobalAvg(data: RDD[Rating]): Double = applyAndAverage(data)(_.rating)
-  
-  def computeUserAvg(data: RDD[Rating], userId: Int):Double = applyAndAverage(data.filter(_.user == userId))(_.rating)
-
-  def computeItemAvg(data: RDD[Rating], itemId: Int):Double = applyAndAverage(data.filter(_.item == itemId))(_.rating)
-
-  //TODO def computeItemDev(data: RDD[Rating], itemId: Int):Double = applyAndAverage(data.filter(_.item == itemId))
 }
