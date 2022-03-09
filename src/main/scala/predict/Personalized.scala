@@ -89,117 +89,117 @@ object Personalized extends App {
     }
   }
 
-  // similarity function that takes as parameter 2 users u and v
-  // weighted sum deviation that takes as parameter function of similarity and return a function of user
-  // prediction function
+  similarity function that takes as parameter 2 users u and v
+  weighted sum deviation that takes as parameter function of similarity and return a function of user
+  prediction function
 
-  // def adjustedCosineSimilarityFunction (ratings : Seq[Rating]) : (Int, Int)=> Double = {
-  //   (u,v) => {  
-  //     // tuple of (list of ratings by u, list of ratings by v, set of items rated by u, set of items rated by v)
-  //     var ratedByUV = ratings.foldLeft((List[Rating](), List[Rating](), Set[Int](),Set[Int]())){ 
-  //       (a,b) => {
-  //         if (b.user == u) {
-  //             (a._1:+ b, a._2,a._3+b.item, a._4)
-  //         } else if (b.user == u) {
-  //           (a._1, a._2:+ b,a._3, a._4+b.item)
-  //         } else a
-  //       }
-  //     }
-  //     // set of items rated by both u and v
-  //     val ratedByBoth = ratedByUV._3.intersect(ratedByUV._4)
+  def adjustedCosineSimilarityFunction (ratings : Seq[Rating]) : (Int, Int)=> Double = {
+    (u,v) => {  
+      // tuple of (list of ratings by u, list of ratings by v, set of items rated by u, set of items rated by v)
+      var ratedByUV = ratings.foldLeft((List[Rating](), List[Rating](), Set[Int](),Set[Int]())){ 
+        (a,b) => {
+          if (b.user == u) {
+              (a._1:+ b, a._2,a._3+b.item, a._4)
+          } else if (b.user == u) {
+            (a._1, a._2:+ b,a._3, a._4+b.item)
+          } else a
+        }
+      }
+      // set of items rated by both u and v
+      val ratedByBoth = ratedByUV._3.intersect(ratedByUV._4)
 
-  //     // filter on both list of ratings the ratings where the item was rated by both users
-  //     // we sort by item the ratings for each list
-  //     val uRatingsOfItemRatedByBoth = ratedByUV._1.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
-  //     val vRatingsOfItemRatedByBoth = ratedByUV._2.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
+      // filter on both list of ratings the ratings where the item was rated by both users
+      // we sort by item the ratings for each list
+      val uRatingsOfItemRatedByBoth = ratedByUV._1.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
+      val vRatingsOfItemRatedByBoth = ratedByUV._2.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
 
-  //     // function of preprocessed ratings
-  //     val preprocessedRatings = preprocessedRating(ratings)
+      // function of preprocessed ratings
+      val preprocessedRatings = preprocessedRating(ratings)
 
-  //     // compute similarity between users u and v
-  //     ratedByBoth.map(i => (preprocessedRatings(u,i), preprocessedRatings(v,i))).map{case (x,y)=> x*y}.sum
-  //   }
-  // }
+      // compute similarity between users u and v
+      ratedByBoth.map(i => (preprocessedRatings(u,i), preprocessedRatings(v,i))).map{case (x,y)=> x*y}.sum
+    }
+  }
 
-  // def preprocessedRating(ratings:Seq[Rating]): (Int,Int)=>Double = {
-  //   val itemsDev = itemsDeviation(ratings)
-  //   (u,i) => {
-  //     var ratedByU = ratings.filter(x=>x.user == u)
-  //     val denominator = math.sqrt(ratedByU.map(x=>math.pow(itemsDev(x.user,x.item),2)).sum)
-  //     val rating = itemsDev(u,i)
-  //     if (rating !=0 && !ratedByU.isEmpty) rating/denominator
-  //     else 0
-  //   }
-  // }
+  def preprocessedRating(ratings:Seq[Rating]): (Int,Int)=>Double = {
+    val itemsDev = itemsDeviation(ratings)
+    (u,i) => {
+      var ratedByU = ratings.filter(x=>x.user == u)
+      val denominator = math.sqrt(ratedByU.map(x=>math.pow(itemsDev(x.user,x.item),2)).sum)
+      val rating = itemsDev(u,i)
+      if (rating !=0 && !ratedByU.isEmpty) rating/denominator
+      else 0
+    }
+  }
 
-  // def preProcRatNum(rats:Seq[Rating]): (Int, Int)=>Double = {
-  //   (u1, u2) => {
-  //     var ratedByUs = rats.foldLeft((List[Rating](), List[Rating](), Set[Int](),Set[Int]())){
-  //       (a,b) => {
-  //         if (b.user == u1) {
-  //             (a._1:+ b, a._2,a._3+b.item, a._4)
-  //         } else if (b.user == u2) {
-  //           (a._1, a._2:+ b,a._3, a._4+b.item)
-  //         } else a
-  //       }
-  //     }
-  //     // set
-  //     var ratedByBoth = ratedByUs._3.intersect(ratedByUs._4)
-  //     var usRatesCommun = ratedByUs._1.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
-  //     var vsRatesCommun = ratedByUs._2.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
+  def preProcRatNum(rats:Seq[Rating]): (Int, Int)=>Double = {
+    (u1, u2) => {
+      var ratedByUs = rats.foldLeft((List[Rating](), List[Rating](), Set[Int](),Set[Int]())){
+        (a,b) => {
+          if (b.user == u1) {
+              (a._1:+ b, a._2,a._3+b.item, a._4)
+          } else if (b.user == u2) {
+            (a._1, a._2:+ b,a._3, a._4+b.item)
+          } else a
+        }
+      }
+      // set
+      var ratedByBoth = ratedByUs._3.intersect(ratedByUs._4)
+      var usRatesCommun = ratedByUs._1.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
+      var vsRatesCommun = ratedByUs._2.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
 
-  //     val denominator = preProcRatDen(usRatesCommun)
-  //     ratedByBoth.map(x => (denominator(x), denominator(x))).map{case (x,y)=> x*y}.sum
-  //   }
-  // }
+      val denominator = preProcRatDen(usRatesCommun)
+      ratedByBoth.map(x => (denominator(x), denominator(x))).map{case (x,y)=> x*y}.sum
+    }
+  }
 
-  // def predSim1(): (Int,Int) => Double = {
-  //   (u,i) => {
-  //     var rated1 = itemsDev.withFilter(x=> x.item == i)
-  //     val WSD_11 = (a:Int) => {
-  //       var ss = rated1.map(x=> a)
-  //       var ssSum = ss.map(_.abs).sum
-  //       if (ssSum!=0){
-  //         rated1.map(_.rating).zip(ss).map{case(x,y)=> x*y}.sum / ssSum
-  //       } else 0
-  //     }
-  //     var uAvg = usersAvg(u) 
-  //     var uWSD = WSD_11(1)
+  def predSim1(): (Int,Int) => Double = {
+    (u,i) => {
+      var rated1 = itemsDev.withFilter(x=> x.item == i)
+      val WSD_11 = (a:Int) => {
+        var ss = rated1.map(x=> a)
+        var ssSum = ss.map(_.abs).sum
+        if (ssSum!=0){
+          rated1.map(_.rating).zip(ss).map{case(x,y)=> x*y}.sum / ssSum
+        } else 0
+      }
+      var uAvg = usersAvg(u) 
+      var uWSD = WSD_11(1)
 
-  //     uAvg+uWSD*scale((uAvg+uWSD), uAvg)
-  //   }
-  // }
+      uAvg+uWSD*scale((uAvg+uWSD), uAvg)
+    }
+  }
 
-  // def itemsDeviation(ratings : Seq[Rating]) : (Int,Int) => Double = {
-  //   (u,i) => {
-  //     val userRatings = ratings.filter(x=>x.user==u)
-  //     val userAvg = mean(userRatings.map(_.rating))
-  //     val uRatedI = userRatings.filter(x=>x.item==i)
-  //     if (!uRatedI.isEmpty) {
-  //       val rating = uRatedI.map(_.rating).head
-  //       (rating-userAvg)/scale(rating, userAvg)
-  //     } else 0 
-  //   }
-  // }
-  // def WeightedSumDeviation (ratings : Seq[Rating], i : Int, similarityFunction : (Int,Int)=>Double) : (Int=>Double) = {
-  //   val itemsDev = itemsDeviation(ratings)
-  //   var ratedI = ratings.withFilter(x=> x.item == i)
-  //   a => {
-  //     var ss = ratedI.map(x=>similarityFunction(x.user, a))
-  //     var ssSum = ss.map(_.abs).sum
-  //     if (ssSum!=0){//au moins un element de ss n'est pas null 
-  //       ratedI.map(x=> similarityFunction(x.user, a)*itemsDev(x.user, i)).sum / ssSum
-  //     } else 0
-  //   }
-  // }
+  def itemsDeviation(ratings : Seq[Rating]) : (Int,Int) => Double = {
+    (u,i) => {
+      val userRatings = ratings.filter(x=>x.user==u)
+      val userAvg = mean(userRatings.map(_.rating))
+      val uRatedI = userRatings.filter(x=>x.item==i)
+      if (!uRatedI.isEmpty) {
+        val rating = uRatedI.map(_.rating).head
+        (rating-userAvg)/scale(rating, userAvg)
+      } else 0 
+    }
+  }
+  def WeightedSumDeviation (ratings : Seq[Rating], i : Int, similarityFunction : (Int,Int)=>Double) : (Int=>Double) = {
+    val itemsDev = itemsDeviation(ratings)
+    var ratedI = ratings.withFilter(x=> x.item == i)
+    a => {
+      var ss = ratedI.map(x=>similarityFunction(x.user, a))
+      var ssSum = ss.map(_.abs).sum
+      if (ssSum!=0){//au moins un element de ss n'est pas null 
+        ratedI.map(x=> similarityFunction(x.user, a)*itemsDev(x.user, i)).sum / ssSum
+      } else 0
+    }
+  }
 
-  // def predict(ratings : Seq[Rating], similarityFunction:(Int,Int)=>Double) : (Int, Int)=>Double = {
-  //  (u,i) => {
-  //    var userAvg = usersAvg(u) 
-  //    var userWSD = WeightedSumDeviation(ratings, i,similarityFunction)(u)
-  //    userAvg+userWSD*scale((userAvg+userWSD), userAvg)
-  //  } 
-  // }
+  def predict(ratings : Seq[Rating], similarityFunction:(Int,Int)=>Double) : (Int, Int)=>Double = {
+   (u,i) => {
+     var userAvg = usersAvg(u) 
+     var userWSD = WeightedSumDeviation(ratings, i,similarityFunction)(u)
+     userAvg+userWSD*scale((userAvg+userWSD), userAvg)
+   } 
+  }
 
   println("")
   spark.close()
