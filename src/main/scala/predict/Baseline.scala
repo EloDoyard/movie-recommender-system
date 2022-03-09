@@ -114,7 +114,7 @@ object Baseline extends App {
           "2.User1Avg" -> ujson.Num(usersAvg.getOrElse(1,avgRating)),  // Datatype of answer: Double
           "3.Item1Avg" -> ujson.Num(itemsAvg.getOrElse(1,avgRating)),   // Datatype of answer: Double
           "4.Item1AvgDev" -> ujson.Num(itemsAvgDev.getOrElse(1,0.0)), // Datatype of answer: Double
-          "5.PredUser1Item1" -> ujson.Num(predictions.getOrElse((1,1),avgRating)) // Datatype of answer: Double
+          "5.PredUser1Item1" -> ujson.Num(predictions(1,1)) // Datatype of answer: Double
         ),
         "B.2" -> ujson.Obj(
           "1.GlobalAvgMAE" -> ujson.Num(MeanAbsoluteError(globalPrediction, test)), // Datatype of answer: Double
@@ -199,12 +199,12 @@ object Baseline extends App {
       )).groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
   }
 
-  def computePrediction(ratings : Seq[Rating]) : Map[(Int,Int),Double] = {
-    ratings.map(x=> {
-      val userAvg = usersAvg.getOrElse(x.user,avgRating)
-      val itemAvgDev = itemsAvgDev.getOrElse(x.item, userAvg)
-      Rating(x.user, x.item, (userAvg+itemAvgDev*scale((userAvg+itemAvgDev), userAvg)))
-    }).groupBy(x=>(x.user,x.item)).mapValues(_.head.rating)
+  def computePrediction(ratings : Seq[Rating]) : (Int,Int) =>Double = {
+    (user: Int, item: Int) => {
+      val userAvg = usersAvg.getOrElse(user,avgRating)
+      val itemAvgDev = itemsAvgDev.getOrElse(item, 0.0)
+      (userAvg+itemAvgDev*scale((userAvg+itemAvgDev), userAvg))
+    }
   }
 
  /////////////////////////////////////////////////////////////////////////////
@@ -252,7 +252,7 @@ object Baseline extends App {
 
   def baselinePredictor() : (Int, Int)=>Double = {
     println("computing baselinePredictor ")
-    (u,i) => predictions.getOrElse((u,i),avgRating)
+    (u,i) => predictions(u,i)
   }
   // def baselinePredictor (ratings : Seq[Rating]) : (Int, Int) => Double = {
   //   val copy = ratings
