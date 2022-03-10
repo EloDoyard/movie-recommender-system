@@ -1,4 +1,5 @@
 package predict
+//package co.kbhr.scaladoc_tags
 
 import org.rogach.scallop._
 import org.apache.spark.rdd.RDD
@@ -39,22 +40,6 @@ object Baseline extends App {
   val train = load(spark, conf.train(), conf.separator()).collect()
   println("Loading test data from: " + conf.test()) 
   val test = load(spark, conf.test(), conf.separator()).collect()
-
-  //B1
-  // val avgRating = computeAvgRating(train)
-  // val usersAvg = computeUserAvg(train)
-  // val itemsAvg = computeItemAvg(train)
-  // val normalizedDeviations = computeNormalizeDeviation(train)
-  // val itemsAvgDev = computeItemAvgDev(train)
-  // val predictions = computePrediction(train)
-  // // val predictor = predict(train)
-  // val globalPrediction = globalAvgPredictor()
-  // val userAvgPrediction = userAvgPredictor()
-  // val itemAvgPrediction = itemAvgPredictor()
-  // val baselinePrediction = baselinePredictor()
-  //B3
-  //val deviationPred = test.map(x=>Rating(x.user, x.item, (x.rating-usersAvg.getOrElse(x.user, globalAvg))/scale(x.rating, usersAvg.getOrElse(x.user, globalAvg))))
-  //var devAvgPred = deviationPred.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
 
   // global average
   val globalMeasure = (1 to conf.num_measurements()).map(x => timingInMs(() => {
@@ -145,157 +130,161 @@ object Baseline extends App {
     }
   }
 
+  /**
+  * Compute the scale function as defined in handout
+  * @param x a user's rating
+  * @param y user's average rating
+  * @return user's rating rescaled
+  */
   def scale (x:Double,y:Double) : Double = {
     if (x>y) 5-y
     else if (x<y) y-1
     else 1
   }
 
+  /**
+  * Compute the mean Absolute Error of a predictor passed as parameter
+  * @param predictor a rating prediction function taking into parameter a user and an item 
+  *   and returns prediction of rating for such pai
+  * @param real Sequence of ratings to evaluate predictor on
+  * @return Mean Absolute Error of predictor
+  */
   def MeanAbsoluteError(predictor : (Int, Int) => Double, real : Seq[Rating]) : Double={
     mean(real.map(x=> (predictor(x.user, x.item)-x.rating).abs))
   }
 
+  /**
+  * Compute the global average rating of sequence passed as parametr
+  * @param ratings a sequence of ratings
+  * @return average rating
+  */
   def globalAvg(ratings : Seq[Rating]) : Double = mean(ratings.map(_.rating))
 
+  /**
+  * Global Average Predictor predicting the global average predictor everytime
+  * @param ratings a sequence of ratings
+  * @return function of the pair (user, item) and returning a prediction for such pair
+  */
   def computeAvgRating(ratings : Seq[Rating]) : (Int, Int) => Double = {
+    // global average rating
     val globalAvgValue = globalAvg(ratings)
+    // returning the global average rating for every value of (user, item)
     (u,i)=> globalAvgValue
   }
 
+  /**
+  * Compute average rating per user
+  * @param ratings a sequence of ratings
+  * @return map every user in ratings sequence to its average rating
+  */
   def usersAvg (ratings : Seq [Rating]) : Map[Int, Double] = ratings.groupBy(_.user).mapValues(x=>globalAvg(x))
 
-  def computeUserAvg(ratings : Seq[Rating]) : (Int,Int) => Double = {// Map[Int,Double] = {
-    // ratings.groupBy(_.user).mapValues(x=>mean(x.map(_.rating)))
+  /**
+  * User Average Predictor predicting for each pair (user, item) the user's average rating
+  * @param ratings a sequence of ratings
+  * @return function that maps the pair (user, item) to the user's average rating
+  */
+  def computeUserAvg(ratings : Seq[Rating]) : (Int,Int) => Double = {
+    // global average rating
     val globalAvgValue = globalAvg(ratings)
+    // map of the average rating per user
     val usersAvgValue = usersAvg(ratings)
+    // returns user's average rating or the global average if user is not in map
     (u,i) => usersAvgValue.getOrElse(u,globalAvgValue)
   }
-
+  
+  /**
+  * Compute average rating per item
+  * @param ratings a sequence of ratings
+  * @return map every item to its average rating
+  */
   def itemsAvg (ratings : Seq[Rating]) : Map[Int, Double] = ratings.groupBy(_.item).mapValues(x=>globalAvg(x))
 
-  def computeItemAvg(ratings : Seq[Rating]) : (Int,Int) => Double = { //Map[Int,Double] = {
-    // ratings.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
+  /**
+  * Item Average Predictor predicting for (user, item) the item's average rating
+  * @param ratings a sequence of ratings
+  * @return function that maps (user, item) to the item's average rating
+  */
+  def computeItemAvg(ratings : Seq[Rating]) : (Int,Int) => Double = {
+    // global average rating
     val globalAvgValue = globalAvg(ratings)
+    // map of average rating per item
     val itemsAvgValue = itemsAvg(ratings)
+    // returns item's average rating or global average if item not in map
     (u,i)=> itemsAvgValue.getOrElse(i, globalAvgValue)
   }
 
-  def computeNormalizeDeviation(ratings : Seq[Rating]) : Map[(Int,Int),Double] = { //Map[(Int,Int), Double] = {
+  /**
+  * Compute normalized deviation for each rating according to formula defined in handout
+  * @param ratings a sequence of ratings
+  * @return map (user, item) to the deviation of its rating
+  */
+  def computeNormalizeDeviation(ratings : Seq[Rating]) : Map[(Int,Int),Double] = {
+    // map of average rating per user
     val usersAvgValue = usersAvg(ratings)
+    // global average rating
     val globalAvgValue = globalAvg(ratings)
 
-    // (u,i) => {
-    //   val userAvg = usersAvgValue.getOrElse(u, globalAvgValue)
-    //   val dev = ratings.filter(x=> x.user == u && x.item == i).map(
-    //     x=> (x.rating-userAvg)/scale(x.rating, userAvg))
-    //   if (!dev.isEmpty) dev.head
-    //   else 0.0
-      ratings.map(
+    // map (user, item) to its deviation
+    ratings.map(
       x=>{
+        // user's average rating of global average rating if not in map
         val userAvg = usersAvgValue.getOrElse(x.user,globalAvgValue)
+        // compute deviation
         Rating(
         x.user,x.item, ((x.rating-userAvg) / scale(x.rating, userAvg))
         )
       }).groupBy(x=>(x.user,x.item)).mapValues(_.head.rating)
-    //}
   }
 
+  /**
+  * Compute the average deviation for each item
+  * @param ratings a sequence of ratings
+  * @return map item to its average deviation
+  */
   def itemsAvgDev(ratings : Seq[Rating]) : Map[Int, Double] = {
+    // map of normalized deviation of each (user, item)
     val normalizedDeviations = computeNormalizeDeviation(ratings)
-    val globalAvgValue = globalAvg(ratings)
-    val deviationsValue = ratings.map(x=>Rating(x.user, x.item, normalizedDeviations.getOrElse((x.user, x.item), 0.0)))
-    deviationsValue.groupBy(_.item).mapValues(x=>globalAvg(x))
+    // map items to its average deviation or 0 if not in map
+    ratings.map(
+      x=>Rating(x.user, x.item, normalizedDeviations.getOrElse((x.user, x.item), 0.0))
+      ).groupBy(_.item).mapValues(x=>globalAvg(x))
   }
-  def computeItemAvgDev(ratings : Seq[Rating]) : (Int,Int) => Double = { // Map[Int,Double] = {
-    // determine U(i) = set of users with rating for i
-    // do mean of noramlized deviation of ratings
-    // val normalizedDeviations = computeNormalizeDeviation(ratings)
-    // val globalAvgValue = globalAvg(ratings)
-    // val deviationsValue = ratings.map(x=>Rating(x.user, x.item, normalizedDeviations.getOrElse((x.user, x.item), 0.0)))
-    
+
+  /**
+  * Item Average Deviation Predictor predicting for (user, item) the item's average deviation rating
+  * @param ratings a sequence of ratings
+  * @return function that maps (user, item) to item's average deviation rating
+  */
+  def computeItemAvgDev(ratings : Seq[Rating]) : (Int,Int) => Double = { 
+    // map of average deviation ratings per item
     val deviationsValue = itemsAvgDev(ratings)
-    (u,i) => deviationsValue.getOrElse(i, 0.0)//{
-    //   val itemDev=ratings.filter(x=>x.item == i).map(
-    //     x=>normalizedDeviations(x.user, x.item)).head
-
-    //   if (!itemDev.isEmpty) globalAvgValue
-    //   else 0.0
-    // }
-    // ratings.map(
-    //   x=>Rating(x.user, x.item, normalizedDeviations(x.user, x.item)
-    //   )).groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
-    // mean(deviationsValue.filter(x=>x.item == i).map(x=>x.rating))
+    // returns average deviation rating per item or 0 if not in map
+    (u,i) => deviationsValue.getOrElse(i, 0.0)
   }
 
+  /**
+  * Baseline Predictor predicting for (user, item) prediction defined in the handout
+  * @param ratings a sequence of ratings
+  * @return function that maps (user, item) to its baseline prediction
+  */
   def computePrediction(ratings : Seq[Rating]) : (Int,Int) =>Double = {
+    // map of users to its average rating
     val usersAvgValue = usersAvg(ratings)
+    // map of items to its item average deviation rating
     val itemsAvgDevValue = itemsAvgDev(ratings)
+    // global average rating
     val globalAvgValue = globalAvg(ratings)
+    // return baseline prediction
     (user: Int, item: Int) => {
-      val userAvg = usersAvgValue.getOrElse(user, globalAvgValue) // usersAvg.getOrElse(user,avgRating)
-      val itemAvgDev = itemsAvgDevValue.getOrElse(item, 0.0)  //itemsAvgDev.getOrElse(item, 0.0)
+      // user's average rating or global average rating if not in map
+      val userAvg = usersAvgValue.getOrElse(user, globalAvgValue)
+      // item's average deviation or 0 if not in map
+      val itemAvgDev = itemsAvgDevValue.getOrElse(item, 0.0)  
+      // baseline prediction
       (userAvg+itemAvgDev*scale((userAvg+itemAvgDev), userAvg))
     }
   }
-
- /////////////////////////////////////////////////////////////////////////////
-
-  // def globalAvgPredictor() : (Int, Int) => Double = {
-  //   println("computing globalAvgPredictor ")
-  //   (u,i) => avgRating
-  // }
-  // def globalAvgPredictor(ratings : Seq[Rating]) : (Int, Int) => Double = {
-  //   (a,b) => computeAvgRating(ratings)
-  // }
-
-  // def userAvgPredictor() : (Int, Int) => Double = {
-  //   println("computing userAvgPredictor ")
-  //   (u,i) => usersAvg.getOrElse(u,avgRating)
-  // }
-  // def userAvgPredictor(ratings : Seq[Rating]) : (Int, Int) => Double = {
-  //   var globalAvg = mean(ratings.map(x => x.rating))
-  //   var usersAvg = ratings.groupBy(_.user).mapValues(x=>mean(x.map(_.rating)))
-  //   (u,i) => usersAvg.getOrElse(u, globalAvg)
-  // }
-
-  // def itemAvgPredictor () : (Int, Int) => Double =  {
-  //   println("computing itemAvgPredictor ")
-  //   (u,i) => itemsAvg.getOrElse(i, avgRating)
-  // }
-  // def itemAvgPredictor (ratings : Seq[Rating]) : (Int, Int) => Double = {
-  //   var globalAvg = mean(ratings.map(x => x.rating))
-  //   var itemsAvg = ratings.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
-  //   (u,i) => itemsAvg.getOrElse(i, globalAvg)
-  // }
-
-  // def baselinePredictor (ratings : Seq[Rating], to_pred:Seq[Rating]) : (Int, Int) => Double = {
-  //   var globalAvg = mean(ratings.map(x => x.rating))
-  //   var usersAvg = ratings.groupBy(_.user).mapValues(x=>mean(x.map(_.rating)))
-  //   var itemsAvg = ratings.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
-  //   // potentiellement faut de faire map sur to_pred
-  //   // val deviationPred = ratings.map(x=>Rating(x.user, x.item, (x.rating-usersAvg.getOrElse(x.user))/scale(x.rating, usersAvg.getOrElse(x.user)))) 
-  //   val deviationPred = to_pred.map(x=>Rating(x.user, x.item, (x.rating-usersAvg.getOrElse(x.user, globalAvg))/scale(x.rating, usersAvg.getOrElse(x.user, globalAvg)))) 
-  //   var devAvgPred = deviationPred.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
-  //   (u,i) => usersAvg.getOrElse(u, globalAvg)+devAvgPred(i)*scale(usersAvg.getOrElse(u, globalAvg)+devAvgPred(i), usersAvg.getOrElse(u, globalAvg))
-  // }
-
-////////////////////////////////////////////////////////////////////////////
-
-  // def baselinePredictor() : (Int, Int)=>Double = {
-  //   println("computing baselinePredictor ")
-  //   (u,i) => predictions(u,i)
-  // }
-  // def baselinePredictor (ratings : Seq[Rating]) : (Int, Int) => Double = {
-  //   val copy = ratings
-  //   var globalAvg = mean(ratings.map(x => x.rating))
-  //   var usersAvg = ratings.groupBy(_.user).mapValues(x=>mean(x.map(_.rating)))
-  //   var itemsAvg = ratings.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
-  //   // potentiellement faut de faire map sur to_pred
-  //   val deviationPred = copy.map(x=>Rating(x.user, x.item, (x.rating-usersAvg.getOrElse(x.user, globalAvg))/scale(x.rating, usersAvg.getOrElse(x.user, globalAvg)))) 
-  //   // val deviationPred = to_pred.map(x=>Rating(x.user, x.item, (x.rating-usersAvg.getOrElse(x.user, globalAvg))/scale(x.rating, usersAvg.getOrElse(x.user, globalAvg)))) 
-  //   var devAvgPred = deviationPred.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
-  //   (u,i) => usersAvg.getOrElse(u, globalAvg)+devAvgPred(i)*scale(usersAvg.getOrElse(u, globalAvg)+devAvgPred(i), usersAvg.getOrElse(u, globalAvg))
-  // }
   println("")
   spark.close()
 }
