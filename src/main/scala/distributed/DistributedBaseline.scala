@@ -44,9 +44,7 @@ object DistributedBaseline extends App {
   val test = load(spark, conf.test(), conf.separator())
 
   val measurements = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    //MeanAbsoluteErrorSpark(baselinePredictorSpark(train,test), test)
-    Thread.sleep(1000) // Do everything here from train and test
-    42 
+    MeanAbsoluteErrorSpark(baselinePredictorSpark(train), test)
   }))
   val timings = measurements.map(t => t._2) // Retrieve the timing measurements
 
@@ -71,11 +69,11 @@ object DistributedBaseline extends App {
         ),
         "D.1" -> ujson.Obj(
           "1.GlobalAvg" -> ujson.Num(getGlobalAvg(train)), // Datatype of answer: Double
-          "2.User1Avg" -> ujson.Num(getUsersAvg(train).getOrElse(1, getGlobalAvg(train))),  // Datatype of answer: Double
-          "3.Item1Avg" -> ujson.Num(getItemsAvg(train).getOrElse(1,getGlobalAvg(train))),   // Datatype of answer: Double
-          "4.Item1AvgDev" -> ujson.Num(getItemsAvgDev(train).getOrElse(1,0.0)), // Datatype of answer: Double,
-          "5.PredUser1Item1" -> ujson.Num(baselinePredictorSpark(train,test)(1,1)), // Datatype of answer: Double
-          "6.Mae" -> ujson.Num(MeanAbsoluteErrorSpark(baselinePredictorSpark(train, test),test)) // Datatype of answer: Double
+          "2.User1Avg" -> ujson.Num(usersAvgSpark(train)(1,0)),  // Datatype of answer: Double
+          "3.Item1Avg" -> ujson.Num(itemsAvgSpark(train)(0,1)),   // Datatype of answer: Double
+          "4.Item1AvgDev" -> ujson.Num(itemsAvgDevSpark(train)(0,1)), // Datatype of answer: Double,
+          "5.PredUser1Item1" -> ujson.Num(baselinePredictorSpark(train)(1,1)), // Datatype of answer: Double
+          "6.Mae" -> ujson.Num(MeanAbsoluteErrorSpark(baselinePredictorSpark(train),test)) // Datatype of answer: Double
         ),
         "D.2" -> ujson.Obj(
           "1.DistributedBaseline" -> ujson.Obj(
@@ -102,40 +100,79 @@ object DistributedBaseline extends App {
 
   def getGlobalAvg(ratings: RDD[Rating]) : Double = meanSpark(ratings.map(_.rating))
 
-  def getUsersAvg(ratings : RDD[Rating]) : collection.Map[Int,Double] = ratings.map{
+  def getUsersAvg(ratings : RDD[Rating]) : Map[Int,Double] = ratings.map{
     case x : Rating => (x.user, (1, x.rating))//x.user->(1,x.rating)
-    }.reduceByKey((acc, a) => (acc._1+a._1, acc._2+a._2)).mapValues(x=>x._2/x._1).collectAsMap
+    }.reduceByKey((acc, a) => (acc._1+a._1, acc._2+a._2)).mapValues(x=>x._2/x._1).collect().toMap
 
-  def getItemsAvg(ratings:RDD[Rating]) : collection.Map[Int,Double] = ratings.map{
+  def usersAvgSpark(ratings: RDD[Rating]) : (Int, Int) => Double = {
+    val globalAvg = getGlobalAvg(ratings)
+    val usersAvg = getUsersAvg(ratings)
+    (u,i) => usersAvg.getOrElse(u, globalAvg)
+  }
+
+  def getItemsAvg(ratings : RDD[Rating]) : Map[Int,Double] = ratings.map{
     case x : Rating => (x.item, (1, x.rating))//x.item->(1,x.rating)
-  }.reduceByKey((acc,a)=>(acc._1+a._1, acc._2+a._2)).mapValues(x=>x._2/x._1).collectAsMap
+  }.reduceByKey((acc,a)=>(acc._1+a._1, acc._2+a._2)).mapValues(x=>x._2/x._1).collect().toMap
   // .groupBy(_.item).mapValues(x=>meanSpark(x.map(_.rating)))
   
-  def getItemsAvgDev (ratings : RDD[Rating]) : collection.Map[Int,Double] = {
+  def itemsAvgSpark(ratings: RDD[Rating]) : (Int, Int) => Double = {
+    val globalAvg = getGlobalAvg(ratings)
+    val itemsAvg = getItemsAvg(ratings)
+    (u,i) => itemsAvg.getOrElse(i, globalAvg)
+  }
+
+  def getNormalizedDev(ratings : RDD[Rating]) : Map[(Int,Int), Double] = {
+    val globalAvg = getGlobalAvg(ratings)
+    val usersAvg = getUsersAvg(ratings)
+    ratings.map{
+      case x: Rating => {
+        val userAvg = usersAvg.getOrElse(x.user, globalAvg)
+        Rating(
+        x.user, x.item, ((x.rating-userAvg)/scale(x.rating, userAvg))
+    )}}.groupBy(x=>(x.user, x.item)).mapValues(x=> x.toSeq.map(_.rating).head).collect().toMap
+  }
+  def getItemsAvgDev (ratings : RDD[Rating]) : Map[Int,Double] = {
     val usersAvg = getUsersAvg(ratings)
     val itemsAvg = getItemsAvg(ratings)
     val globalAvg = getGlobalAvg(ratings)
-    val deviation = ratings.map(x=>Rating(x.user, x.item, (x.rating-usersAvg.getOrElse(x.user, globalAvg))/scale(x.rating, usersAvg.getOrElse(x.user, globalAvg))))
+    val normalizedDevs = getNormalizedDev(ratings)
+    val deviation = ratings.map(x=>Rating(x.user, x.item, normalizedDevs.getOrElse((x.user, x.item), 0.0)))
     deviation.map{
       case x : Rating => (x.item, (1, x.rating))
-    }.reduceByKey((acc,a)=>(acc._1+a._1, acc._2+a._2)).mapValues(x=>x._2/x._1).collectAsMap
+    }.reduceByKey((acc,a)=>(acc._1+a._1, acc._2+a._2)).mapValues(x=>x._2/x._1).collect().toMap
  }
 
-  def baselinePredictorSpark (ratings : RDD[Rating], to_pred:RDD[Rating]) : (Int, Int) => Double = {
+ def itemsAvgDevSpark(ratings : RDD [Rating]) : (Int, Int) => Double = {
+  //  val globalAvg = getGlobalAvg(ratings)
+  //  val itemsAvgDev = getItemsAvg(ratings)
+  val itemsAvgDev = getItemsAvgDev(ratings)
+   (u,i) => itemsAvgDev.getOrElse(i, 0.0)
+ }
+
+  def baselinePredictorSpark (ratings : RDD[Rating]) : (Int, Int) => Double = {
     val globalAvg = getGlobalAvg(ratings)
     val usersAvg = getUsersAvg(ratings)
-    val itemsAvg = getItemsAvg(ratings)
-    val deviationAvg = getItemsAvgDev(ratings)
-    // potentiellement faut de faire map sur to_pred
-    // val deviationPred = ratings.map(x=>Rating(x.user, x.item, (x.rating-usersAvg.getOrElse(x.user))/scale(x.rating, usersAvg.getOrElse(x.user)))) 
-    val deviationPred = to_pred.map(x=>Rating(x.user, x.item, (x.rating-usersAvg.getOrElse(x.user, globalAvg))/scale(x.rating, usersAvg.getOrElse(x.user, globalAvg)))) 
-    var devAvgPred = deviationPred.map{
-      case x : Rating => (x.item, (1, x.rating))
-    }.reduceByKey((acc,a)=>(acc._1+a._1, acc._2+a._2)).mapValues(x=>x._2/x._1).collectAsMap
+    val itemsAvgDev = getItemsAvgDev(ratings)
     (u,i) => {
-      val temp = devAvgPred.getOrElse(i, 0.0)
-      usersAvg.getOrElse(u, globalAvg)+temp*scale(usersAvg.getOrElse(u, globalAvg)+temp, usersAvg.getOrElse(u, globalAvg))
+      val userAvg = usersAvg.getOrElse(u, globalAvg)
+      val itemAvgDev = itemsAvgDev.getOrElse(i, 0.0)
+      (userAvg+itemAvgDev*scale((userAvg+itemAvgDev), userAvg))
     }
+    
+    // val globalAvg = getGlobalAvg(ratings)
+    // val usersAvg = getUsersAvg(ratings)
+    // val itemsAvg = getItemsAvg(ratings)
+    // val deviationAvg = getItemsAvgDev(ratings)
+    // // potentiellement faut de faire map sur to_pred
+    // // val deviationPred = ratings.map(x=>Rating(x.user, x.item, (x.rating-usersAvg.getOrElse(x.user))/scale(x.rating, usersAvg.getOrElse(x.user)))) 
+    // val deviationPred = to_pred.map(x=>Rating(x.user, x.item, (x.rating-usersAvg.getOrElse(x.user, globalAvg))/scale(x.rating, usersAvg.getOrElse(x.user, globalAvg)))) 
+    // var devAvgPred = deviationPred.map{
+    //   case x : Rating => (x.item, (1, x.rating))
+    // }.reduceByKey((acc,a)=>(acc._1+a._1, acc._2+a._2)).mapValues(x=>x._2/x._1).collectAsMap
+    // (u,i) => {
+    //   val temp = devAvgPred.getOrElse(i, 0.0)
+    //   usersAvg.getOrElse(u, globalAvg)+temp*scale(usersAvg.getOrElse(u, globalAvg)+temp, usersAvg.getOrElse(u, globalAvg))
+    // }
   }
 
   println("")

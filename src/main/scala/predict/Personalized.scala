@@ -42,8 +42,8 @@ object Personalized extends App {
   val test = load(spark, conf.test(), conf.separator()).collect()
   
   // Compute here
-  // var usersAvg = train.groupBy(_.user).mapValues(_.map(_.rating)).map(x=>(x._1, mean(x._2)))
-  // var itemsDev = train.map(x=>Rating(x.user, x.item, (x.rating-usersAvg(x.user))/scale(x.rating, usersAvg(x.user))))
+  var usersAvg = train.groupBy(_.user).mapValues(_.map(_.rating)).map(x=>(x._1, mean(x._2)))
+  var itemsDev = train.map(x=>Rating(x.user, x.item, (x.rating-usersAvg(x.user))/scale(x.rating, usersAvg(x.user))))
 
   // Save answers as JSON
   def printToFile(content: String, 
@@ -58,9 +58,9 @@ object Personalized extends App {
     case None => ; 
     case Some(jsonFile) => {
       // var predUser1Item1 = PredUser1Item1()
-      // val predictor1Sim = predict(train, (_,_)=>1)
-      // val ACSim = adjustedCosineSimilarityFunction(train)
-      // val predictorACSim = predict(train, ACSim)
+      val predictor1Sim = predict(train, (_,_)=>1)
+      val ACSim = adjustedCosineSimilarityFunction(train)
+      val predictorACSim = predict(train, ACSim)
       val answers = ujson.Obj(
         "Meta" -> ujson.Obj(
           "1.Train" -> ujson.Str(conf.train()),
@@ -68,13 +68,13 @@ object Personalized extends App {
           "3.Measurements" -> ujson.Num(conf.num_measurements())
         ),
         "P.1" -> ujson.Obj(
-          "1.PredUser1Item1" -> ujson.Num(0.0),//predictor1Sim(1,1)), // Prediction of item 1 for user 1 (similarity 1 between users)
-          "2.OnesMAE" -> ujson.Num(0.0)//MeanAbsoluteError(predictor1Sim, test))         // MAE when using similarities of 1 between all users
+          "1.PredUser1Item1" -> ujson.Num(predictor1Sim(1,1)), // Prediction of item 1 for user 1 (similarity 1 between users)
+          "2.OnesMAE" -> ujson.Num(MeanAbsoluteError(predictor1Sim, test))         // MAE when using similarities of 1 between all users
         ),
         "P.2" -> ujson.Obj(
-          "1.AdjustedCosineUser1User2" -> ujson.Num(0.0),//ACSim(1, 2)), // Similarity between user 1 and user 2 (adjusted Cosine)
-          "2.PredUser1Item1" -> ujson.Num(0.0),//predictorACSim(1,1)),  // Prediction item 1 for user 1 (adjusted cosine)
-          "3.AdjustedCosineMAE" -> ujson.Num(0.0)//MeanAbsoluteError(predictorACSim, test)) // MAE when using adjusted cosine similarity
+          "1.AdjustedCosineUser1User2" -> ujson.Num(ACSim(1, 2)), // Similarity between user 1 and user 2 (adjusted Cosine)
+          "2.PredUser1Item1" -> ujson.Num(predictorACSim(1,1)),  // Prediction item 1 for user 1 (adjusted cosine)
+          "3.AdjustedCosineMAE" -> ujson.Num(MeanAbsoluteError(predictorACSim, test)) // MAE when using adjusted cosine similarity
         ),
         "P.3" -> ujson.Obj(
           "1.JaccardUser1User2" -> ujson.Num(0.0), // Similarity between user 1 and user 2 (jaccard similarity)
@@ -89,9 +89,9 @@ object Personalized extends App {
     }
   }
 
-  similarity function that takes as parameter 2 users u and v
-  weighted sum deviation that takes as parameter function of similarity and return a function of user
-  prediction function
+  // similarity function that takes as parameter 2 users u and v
+  // weighted sum deviation that takes as parameter function of similarity and return a function of user
+  // prediction function
 
   def adjustedCosineSimilarityFunction (ratings : Seq[Rating]) : (Int, Int)=> Double = {
     (u,v) => {  
@@ -132,45 +132,46 @@ object Personalized extends App {
     }
   }
 
-  def preProcRatNum(rats:Seq[Rating]): (Int, Int)=>Double = {
-    (u1, u2) => {
-      var ratedByUs = rats.foldLeft((List[Rating](), List[Rating](), Set[Int](),Set[Int]())){
-        (a,b) => {
-          if (b.user == u1) {
-              (a._1:+ b, a._2,a._3+b.item, a._4)
-          } else if (b.user == u2) {
-            (a._1, a._2:+ b,a._3, a._4+b.item)
-          } else a
-        }
-      }
-      // set
-      var ratedByBoth = ratedByUs._3.intersect(ratedByUs._4)
-      var usRatesCommun = ratedByUs._1.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
-      var vsRatesCommun = ratedByUs._2.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
+  // def preProcRatNum(rats:Seq[Rating]): (Int, Int)=>Double = {
+  //   (u1, u2) => {
+  //     var ratedByUs = rats.foldLeft((List[Rating](), List[Rating](), Set[Int](),Set[Int]())){
+  //       (a,b) => {
+  //         if (b.user == u1) {
+  //             (a._1:+ b, a._2,a._3+b.item, a._4)
+  //         } else if (b.user == u2) {
+  //           (a._1, a._2:+ b,a._3, a._4+b.item)
+  //         } else a
+  //       }
+  //     }
+  //     // set
+  //     var ratedByBoth = ratedByUs._3.intersect(ratedByUs._4)
+  //     var usRatesCommun = ratedByUs._1.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
+  //     var vsRatesCommun = ratedByUs._2.filter(x=> ratedByBoth.contains(x.item)).sortBy(_.item)
 
-      val denominator = preProcRatDen(usRatesCommun)
-      ratedByBoth.map(x => (denominator(x), denominator(x))).map{case (x,y)=> x*y}.sum
-    }
-  }
+  //     val denominator = preProcRatDen(usRatesCommun)
+  //     ratedByBoth.map(x => (denominator(x), denominator(x))).map{case (x,y)=> x*y}.sum
+  //   }
+  // }
 
-  def predSim1(): (Int,Int) => Double = {
-    (u,i) => {
-      var rated1 = itemsDev.withFilter(x=> x.item == i)
-      val WSD_11 = (a:Int) => {
-        var ss = rated1.map(x=> a)
-        var ssSum = ss.map(_.abs).sum
-        if (ssSum!=0){
-          rated1.map(_.rating).zip(ss).map{case(x,y)=> x*y}.sum / ssSum
-        } else 0
-      }
-      var uAvg = usersAvg(u) 
-      var uWSD = WSD_11(1)
+  // def predSim1(): (Int,Int) => Double = {
+  //   (u,i) => {
+  //     var rated1 = itemsDev.withFilter(x=> x.item == i)
+  //     val WSD_11 = (a:Int) => {
+  //       var ss = rated1.map(x=> a)
+  //       var ssSum = ss.map(_.abs).sum
+  //       if (ssSum!=0){
+  //         rated1.map(_.rating).zip(ss).map{case(x,y)=> x*y}.sum / ssSum
+  //       } else 0
+  //     }
+  //     var uAvg = usersAvg(u) 
+  //     var uWSD = WSD_11(1)
 
-      uAvg+uWSD*scale((uAvg+uWSD), uAvg)
-    }
-  }
+  //     uAvg+uWSD*scale((uAvg+uWSD), uAvg)
+  //   }
+  // }
 
   def itemsDeviation(ratings : Seq[Rating]) : (Int,Int) => Double = {
+    // val normalizedDeviations = computeNormalizeDeviation(ratings)
     (u,i) => {
       val userRatings = ratings.filter(x=>x.user==u)
       val userAvg = mean(userRatings.map(_.rating))

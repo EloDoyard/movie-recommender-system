@@ -41,54 +41,49 @@ object Baseline extends App {
   val test = load(spark, conf.test(), conf.separator()).collect()
 
   //B1
-  val avgRating = computeAvgRating(train)
-  val usersAvg = computeUserAvg(train)
-  val itemsAvg = computeItemAvg(train)
-  val normalizedDeviations = computeNormalizeDeviation(train)
-  val itemsAvgDev = computeItemAvgDev(train)
-  val predictions = computePrediction(train)
-  // val predictor = predict(train)
-  val globalPrediction = globalAvgPredictor()
-  val userAvgPrediction = userAvgPredictor()
-  val itemAvgPrediction = itemAvgPredictor()
-  val baselinePrediction = baselinePredictor()
+  // val avgRating = computeAvgRating(train)
+  // val usersAvg = computeUserAvg(train)
+  // val itemsAvg = computeItemAvg(train)
+  // val normalizedDeviations = computeNormalizeDeviation(train)
+  // val itemsAvgDev = computeItemAvgDev(train)
+  // val predictions = computePrediction(train)
+  // // val predictor = predict(train)
+  // val globalPrediction = globalAvgPredictor()
+  // val userAvgPrediction = userAvgPredictor()
+  // val itemAvgPrediction = itemAvgPredictor()
+  // val baselinePrediction = baselinePredictor()
   //B3
   //val deviationPred = test.map(x=>Rating(x.user, x.item, (x.rating-usersAvg.getOrElse(x.user, globalAvg))/scale(x.rating, usersAvg.getOrElse(x.user, globalAvg))))
   //var devAvgPred = deviationPred.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
 
   // global average
   val globalMeasure = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    //MeanAbsoluteError(globalPrediction, test)
-    Thread.sleep(1000) // Do everything here from train and test
-    42 
+    MeanAbsoluteError(computeAvgRating(train), test)
+    
   }))
   val globalTime = globalMeasure.map(t => t._2) // Retrieve the timing measurements
 
   // user average
   val userMeasure = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    //MeanAbsoluteError(userAvgPrediction, test)
-    Thread.sleep(1000) // Do everything here from train and test
-    42 
+    MeanAbsoluteError(computeUserAvg(train), test)
+    
   }))
   val userTime = userMeasure.map(t => t._2) // Retrieve the timing measurements
 
   // item average
   val itemMeasure = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    //MeanAbsoluteError(itemAvgPrediction, test)
-    Thread.sleep(1000) // Do everything here from train and test
-    42 
+    MeanAbsoluteError(computeItemAvg(train), test)
+    
   }))
   val itemTime = itemMeasure.map(t => t._2) // Retrieve the timing measurements
 
   // baseline
   val baselineMeasure = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    //MeanAbsoluteError(baselinePrediction, test)
-    Thread.sleep(1000) // Do everything here from train and test
-    42 
+    MeanAbsoluteError(computePrediction(train), test)
+    
   }))
   val baselineTime = baselineMeasure.map(t => t._2) // Retrieve the timing measurements
 
-  println("coucou")
   // Save answers as JSON
   def printToFile(content: String, 
                   location: String = "./answers.json") =
@@ -110,17 +105,17 @@ object Baseline extends App {
           "3.Measurements" -> ujson.Num(conf.num_measurements())
         ),
         "B.1" -> ujson.Obj(
-          "1.GlobalAvg" -> ujson.Num(avgRating), // Datatype of answer: Double
-          "2.User1Avg" -> ujson.Num(usersAvg.getOrElse(1,avgRating)),  // Datatype of answer: Double
-          "3.Item1Avg" -> ujson.Num(itemsAvg.getOrElse(1,avgRating)),   // Datatype of answer: Double
-          "4.Item1AvgDev" -> ujson.Num(itemsAvgDev.getOrElse(1,0.0)), // Datatype of answer: Double
-          "5.PredUser1Item1" -> ujson.Num(predictions(1,1)) // Datatype of answer: Double
+          "1.GlobalAvg" -> ujson.Num(computeAvgRating(train)(1,1)), // Datatype of answer: Double
+          "2.User1Avg" -> ujson.Num(computeUserAvg(train)(1,1)),  // Datatype of answer: Double
+          "3.Item1Avg" -> ujson.Num(computeItemAvg(train)(1,1)),   // Datatype of answer: Double
+          "4.Item1AvgDev" -> ujson.Num(computeItemAvgDev(train)(1,1)), // Datatype of answer: Double
+          "5.PredUser1Item1" -> ujson.Num(computePrediction(train)(1,1)) // Datatype of answer: Double
         ),
         "B.2" -> ujson.Obj(
-          "1.GlobalAvgMAE" -> ujson.Num(MeanAbsoluteError(globalPrediction, test)), // Datatype of answer: Double
-          "2.UserAvgMAE" -> ujson.Num(MeanAbsoluteError(userAvgPrediction, test)),  // Datatype of answer: Double
-          "3.ItemAvgMAE" -> ujson.Num(MeanAbsoluteError(itemAvgPrediction, test)),   // Datatype of answer: Double
-          "4.BaselineMAE" -> ujson.Num(MeanAbsoluteError(baselinePrediction, test))   // Datatype of answer: Double
+          "1.GlobalAvgMAE" -> ujson.Num(MeanAbsoluteError(computeAvgRating(train), test)), // Datatype of answer: Double
+          "2.UserAvgMAE" -> ujson.Num(MeanAbsoluteError(computeUserAvg(train), test)),  // Datatype of answer: Double
+          "3.ItemAvgMAE" -> ujson.Num(MeanAbsoluteError(computeItemAvg(train), test)),   // Datatype of answer: Double
+          "4.BaselineMAE" -> ujson.Num(MeanAbsoluteError(computePrediction(train), test))   // Datatype of answer: Double
         ),
         "B.3" -> ujson.Obj(
           "1.GlobalAvg" -> ujson.Obj(
@@ -160,77 +155,113 @@ object Baseline extends App {
     mean(real.map(x=> (predictor(x.user, x.item)-x.rating).abs))
   }
 
-  def computeAvgRating(ratings : Seq[Rating]) : Double = {
-    val values = ratings.map(_.rating)
-    if (!values.isEmpty) mean(values)
-    else 0
+  def globalAvg(ratings : Seq[Rating]) : Double = mean(ratings.map(_.rating))
+
+  def computeAvgRating(ratings : Seq[Rating]) : (Int, Int) => Double = {
+    val globalAvgValue = globalAvg(ratings)
+    (u,i)=> globalAvgValue
   }
 
-  def computeUserAvg(ratings : Seq[Rating]) : Map[Int,Double] = {
-    ratings.groupBy(_.user).mapValues(x=>mean(x.map(_.rating)))
-    // val userRatings = ratings.filter(x=>x.user == u)
-    // if (!userRatings.isEmpty) computeAvgRating(userRatings)
-    // else 0
+  def usersAvg (ratings : Seq [Rating]) : Map[Int, Double] = ratings.groupBy(_.user).mapValues(x=>globalAvg(x))
+
+  def computeUserAvg(ratings : Seq[Rating]) : (Int,Int) => Double = {// Map[Int,Double] = {
+    // ratings.groupBy(_.user).mapValues(x=>mean(x.map(_.rating)))
+    val globalAvgValue = globalAvg(ratings)
+    val usersAvgValue = usersAvg(ratings)
+    (u,i) => usersAvgValue.getOrElse(u,globalAvgValue)
   }
 
-  def computeItemAvg(ratings : Seq[Rating]) : Map[Int,Double] = {
-    ratings.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
-    // val itemRatings = ratings.filter(x=>x.item == i)
-    // if (!itemRatings.isEmpty) computeAvgRating(itemRatings)
-    // else 0
+  def itemsAvg (ratings : Seq[Rating]) : Map[Int, Double] = ratings.groupBy(_.item).mapValues(x=>globalAvg(x))
+
+  def computeItemAvg(ratings : Seq[Rating]) : (Int,Int) => Double = { //Map[Int,Double] = {
+    // ratings.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
+    val globalAvgValue = globalAvg(ratings)
+    val itemsAvgValue = itemsAvg(ratings)
+    (u,i)=> itemsAvgValue.getOrElse(i, globalAvgValue)
   }
 
-  def computeNormalizeDeviation(ratings : Seq[Rating]) : Map[(Int,Int), Double] = {
-    ratings.map(
-      x=>Rating(
-        x.user,x.item, ((x.rating-usersAvg.getOrElse(x.user,avgRating)) / scale(x.rating, usersAvg.getOrElse(x.user,avgRating)))
-        )).groupBy(x=>(x.user,x.item)).mapValues(_.head.rating)
+  def computeNormalizeDeviation(ratings : Seq[Rating]) : Map[(Int,Int),Double] = { //Map[(Int,Int), Double] = {
+    val usersAvgValue = usersAvg(ratings)
+    val globalAvgValue = globalAvg(ratings)
+
+    // (u,i) => {
+    //   val userAvg = usersAvgValue.getOrElse(u, globalAvgValue)
+    //   val dev = ratings.filter(x=> x.user == u && x.item == i).map(
+    //     x=> (x.rating-userAvg)/scale(x.rating, userAvg))
+    //   if (!dev.isEmpty) dev.head
+    //   else 0.0
+      ratings.map(
+      x=>{
+        val userAvg = usersAvgValue.getOrElse(x.user,globalAvgValue)
+        Rating(
+        x.user,x.item, ((x.rating-userAvg) / scale(x.rating, userAvg))
+        )
+      }).groupBy(x=>(x.user,x.item)).mapValues(_.head.rating)
+    //}
   }
 
-  def computeItemAvgDev(ratings : Seq[Rating]) : Map[Int,Double] = {
+  def itemsAvgDev(ratings : Seq[Rating]) : Map[Int, Double] = {
+    val normalizedDeviations = computeNormalizeDeviation(ratings)
+    val globalAvgValue = globalAvg(ratings)
+    val deviationsValue = ratings.map(x=>Rating(x.user, x.item, normalizedDeviations.getOrElse((x.user, x.item), 0.0)))
+    deviationsValue.groupBy(_.item).mapValues(x=>globalAvg(x))
+  }
+  def computeItemAvgDev(ratings : Seq[Rating]) : (Int,Int) => Double = { // Map[Int,Double] = {
     // determine U(i) = set of users with rating for i
-    // do mean of noramlized deviation of ratings 
-    // val itemDev=ratings.filter(x=>x.item == i).map(
-    //   x=>Rating(x.user, x.item, normalizedDeviations.getOrElse((x.user, x.item),0)))
-    // if (!itemDev.isEmpty)computeAvgRating(itemDev)
-    // else 0
-    ratings.map(
-      x=>Rating(x.user, x.item, normalizedDeviations.getOrElse((x.user, x.item),0.0)
-      )).groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
+    // do mean of noramlized deviation of ratings
+    // val normalizedDeviations = computeNormalizeDeviation(ratings)
+    // val globalAvgValue = globalAvg(ratings)
+    // val deviationsValue = ratings.map(x=>Rating(x.user, x.item, normalizedDeviations.getOrElse((x.user, x.item), 0.0)))
+    
+    val deviationsValue = itemsAvgDev(ratings)
+    (u,i) => deviationsValue.getOrElse(i, 0.0)//{
+    //   val itemDev=ratings.filter(x=>x.item == i).map(
+    //     x=>normalizedDeviations(x.user, x.item)).head
+
+    //   if (!itemDev.isEmpty) globalAvgValue
+    //   else 0.0
+    // }
+    // ratings.map(
+    //   x=>Rating(x.user, x.item, normalizedDeviations(x.user, x.item)
+    //   )).groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
+    // mean(deviationsValue.filter(x=>x.item == i).map(x=>x.rating))
   }
 
   def computePrediction(ratings : Seq[Rating]) : (Int,Int) =>Double = {
+    val usersAvgValue = usersAvg(ratings)
+    val itemsAvgDevValue = itemsAvgDev(ratings)
+    val globalAvgValue = globalAvg(ratings)
     (user: Int, item: Int) => {
-      val userAvg = usersAvg.getOrElse(user,avgRating)
-      val itemAvgDev = itemsAvgDev.getOrElse(item, 0.0)
+      val userAvg = usersAvgValue.getOrElse(user, globalAvgValue) // usersAvg.getOrElse(user,avgRating)
+      val itemAvgDev = itemsAvgDevValue.getOrElse(item, 0.0)  //itemsAvgDev.getOrElse(item, 0.0)
       (userAvg+itemAvgDev*scale((userAvg+itemAvgDev), userAvg))
     }
   }
 
  /////////////////////////////////////////////////////////////////////////////
 
-  def globalAvgPredictor() : (Int, Int) => Double = {
-    println("computing globalAvgPredictor ")
-    (u,i) => avgRating
-  }
+  // def globalAvgPredictor() : (Int, Int) => Double = {
+  //   println("computing globalAvgPredictor ")
+  //   (u,i) => avgRating
+  // }
   // def globalAvgPredictor(ratings : Seq[Rating]) : (Int, Int) => Double = {
   //   (a,b) => computeAvgRating(ratings)
   // }
 
-  def userAvgPredictor() : (Int, Int) => Double = {
-    println("computing userAvgPredictor ")
-    (u,i) => usersAvg.getOrElse(u,avgRating)
-  }
+  // def userAvgPredictor() : (Int, Int) => Double = {
+  //   println("computing userAvgPredictor ")
+  //   (u,i) => usersAvg.getOrElse(u,avgRating)
+  // }
   // def userAvgPredictor(ratings : Seq[Rating]) : (Int, Int) => Double = {
   //   var globalAvg = mean(ratings.map(x => x.rating))
   //   var usersAvg = ratings.groupBy(_.user).mapValues(x=>mean(x.map(_.rating)))
   //   (u,i) => usersAvg.getOrElse(u, globalAvg)
   // }
 
-  def itemAvgPredictor () : (Int, Int) => Double =  {
-    println("computing itemAvgPredictor ")
-    (u,i) => itemsAvg.getOrElse(i, avgRating)
-  }
+  // def itemAvgPredictor () : (Int, Int) => Double =  {
+  //   println("computing itemAvgPredictor ")
+  //   (u,i) => itemsAvg.getOrElse(i, avgRating)
+  // }
   // def itemAvgPredictor (ratings : Seq[Rating]) : (Int, Int) => Double = {
   //   var globalAvg = mean(ratings.map(x => x.rating))
   //   var itemsAvg = ratings.groupBy(_.item).mapValues(x=>mean(x.map(_.rating)))
@@ -250,10 +281,10 @@ object Baseline extends App {
 
 ////////////////////////////////////////////////////////////////////////////
 
-  def baselinePredictor() : (Int, Int)=>Double = {
-    println("computing baselinePredictor ")
-    (u,i) => predictions(u,i)
-  }
+  // def baselinePredictor() : (Int, Int)=>Double = {
+  //   println("computing baselinePredictor ")
+  //   (u,i) => predictions(u,i)
+  // }
   // def baselinePredictor (ratings : Seq[Rating]) : (Int, Int) => Double = {
   //   val copy = ratings
   //   var globalAvg = mean(ratings.map(x => x.rating))
