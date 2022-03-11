@@ -154,6 +154,32 @@ object Baseline extends App {
   }
 
   /**
+  * Compute the MAE on the given data set 
+  * @param data the data set on which to compute the MAE
+  * @param predict function used to make a prediction for the rating
+  * @return the MAE
+  */
+  def MAE(predict: (Int, Int)=> Double, data: Seq[Rating]): Double = {
+    applyAndMean(data){
+      x => (x.rating-predict(x.user, x.item)).abs
+    }
+  }
+
+  /** Apply a function to every element of the data set and then average
+  *  @param data the data set
+  *  @param f the function to applied on each element
+  *  @return The mean value computed over the data set
+  */
+  def applyAndMean(data: Seq[Rating])(f: (Rating=>Double)):Double={
+    val res = data.foldLeft((0.0,0)){
+      // The accumulator is a tuple (Double, Int) which consists of the running sum and the running count of added entities
+      (acc,x) => (f(x) + acc._1, acc._2+1)
+    }
+    res._1/res._2
+  }
+
+
+  /**
   * Compute the global average rating of sequence passed as parametr
   * @param ratings a sequence of ratings
   * @return average rating
