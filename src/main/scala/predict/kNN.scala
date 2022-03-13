@@ -65,9 +65,9 @@ object kNN extends App {
           "3.Measurements" -> conf.num_measurements()
         ),
         "N.1" -> ujson.Obj(
-          "1.k10u1v1" -> ujson.Num(getSimilarity(train, 10)(1,1)), // Similarity between user 1 and user 1 (k=10)
-          "2.k10u1v864" -> ujson.Num(0.0), // Similarity between user 1 and user 864 (k=10)
-          "3.k10u1v886" -> ujson.Num(0.0), // Similarity between user 1 and user 886 (k=10)
+          "1.k10u1v1" -> ujson.Num(0.0),//getSimilarity(train, 10)(1,1)), // Similarity between user 1 and user 1 (k=10)
+          "2.k10u1v864" -> ujson.Num(getSimilarity(train, 10)(1,864)), // Similarity between user 1 and user 864 (k=10)
+          "3.k10u1v886" -> ujson.Num(0.0),//getSimilarity(train, 10)(1,886)), // Similarity between user 1 and user 886 (k=10)
           "4.PredUser1Item1" -> ujson.Num(0.0) // Prediction of item 1 for user 1 (k=10)
         ),
         "N.2" -> ujson.Obj(
@@ -104,7 +104,7 @@ object kNN extends App {
       (acc, a) => {
         acc+(
           a._1 -> (((a, similarityFunction(a._1, a._2))) +: acc.getOrElse(a._1, Seq())), 
-          a._2 -> (((a, similarityFunction(a._1,a._2)))+:acc.getOrElse(a._2, Seq())))
+          a._2 -> ((((a._2,a._1), similarityFunction(a._1,a._2)))+:acc.getOrElse(a._2, Seq())))
       }
     }
 
@@ -119,15 +119,7 @@ object kNN extends App {
 
   def getSimilarity (ratings : Seq[Rating], k : Int) : (Int, Int) => Double = {
     val neighbors = getNeighbors(ratings, k)
-    (u,v) => {
-      val uNeighborhood = neighbors.getOrElse(u,Nil).toMap
-      val uvSim = uNeighborhood.getOrElse((u,v),0.0)
-      if (uvSim!=0.0) uvSim 
-      else {
-        val vNeighborhood = neighbors.getOrElse(v, Nil).toMap
-        vNeighborhood.getOrElse((v,u),0.0)
-      }
-  }
+    (u,v) => neighbors.getOrElse(u,Nil).toMap.getOrElse((u,v), 0.0)
   }
 
   def weightedSumDevKNN (ratings : Seq[Rating], k : Int) : (Int, Int) => Double = {
