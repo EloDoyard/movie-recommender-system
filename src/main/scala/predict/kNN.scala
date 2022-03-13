@@ -42,8 +42,9 @@ object kNN extends App {
 
 
   val measurements = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    Thread.sleep(1000) // Do everything here from train and test
-    42        // Output answer as last value
+    //MeanAbsoluteError(predictKNN(train, 300),test)
+    Thread.sleep(1000)
+    42
   }))
   val timings = measurements.map(t => t._2) // Retrieve the timing measurements
 
@@ -66,15 +67,15 @@ object kNN extends App {
         ),
         "N.1" -> ujson.Obj(
           "1.k10u1v1" -> ujson.Num(0.0),//getSimilarity(train, 10)(1,1)), // Similarity between user 1 and user 1 (k=10)
-          "2.k10u1v864" -> ujson.Num(getSimilarity(train, 10)(1,864)), // Similarity between user 1 and user 864 (k=10)
+          "2.k10u1v864" -> ujson.Num(0.0),//getSimilarity(train, 10)(1,864)), // Similarity between user 1 and user 864 (k=10)
           "3.k10u1v886" -> ujson.Num(0.0),//getSimilarity(train, 10)(1,886)), // Similarity between user 1 and user 886 (k=10)
-          "4.PredUser1Item1" -> ujson.Num(0.0) // Prediction of item 1 for user 1 (k=10)
+          "4.PredUser1Item1" -> ujson.Num(0.0)//predictKNN(train, 10)(1,1))//Prediction of item 1 for user 1 (k=10)
         ),
         "N.2" -> ujson.Obj(
           "1.kNN-Mae" -> List(10,30,50,100,200,300,400,800,943).map(k => 
               List(
                 k,
-                0.0 // Compute MAE
+                MeanAbsoluteError(predictKNN(train, k), test) // Compute MAE
               )
           ).toList
         ),
@@ -93,48 +94,63 @@ object kNN extends App {
     }
   }
 
-  def getNeighbors(ratings : Seq[Rating], k : Int) : Map[Int, Seq[((Int, Int), Double)]] = {
+  def getNeighbors(ratings : Seq[Rating], k : Int) : Int => Seq[(Int, Double)] = {
     // ratings.map(_.user).toSet.toList.permutations(2).groupBy(x._1).mapValues(
     //   y=>y.map(
     //     x=> (x, adjustedCosineSimilarityFunction(x._1, x._2))).toSeq.sortWith(_._2>_._2).take(k))
 
     val similarityFunction = adjustedCosineSimilarityFunction(ratings)
-    val neighbors = ratings.map(_.user).toSet.toList.combinations(2).map{ case List(a, b) => (a, b) }.toSeq.foldLeft(
-      Map[Int, Seq[((Int, Int), Double)]]()){
-      (acc, a) => {
-        acc+(
-          a._1 -> (((a, similarityFunction(a._1, a._2))) +: acc.getOrElse(a._1, Seq())), 
-          a._2 -> ((((a._2,a._1), similarityFunction(a._1,a._2)))+:acc.getOrElse(a._2, Seq())))
+
+    val allUsers = ratings.map(x=>x.user).toSet
+    var allNeighbors = Map[Int, Seq[(Int, Double)]]()
+
+    u => {
+      var uNeighbors = allNeighbors.getOrElse(u, Nil)
+      if (uNeighbors.isEmpty) {
+        uNeighbors = (allUsers-u).toSeq.map(x=>(x, similarityFunction(u,x))).sortWith(_._2>_._2).take(k)
+        allNeighbors = allNeighbors+(u-> uNeighbors)
       }
+      uNeighbors
+      // (allUsers-u).toSeq.map(x=>(x, similarityFunction(u,x))).sortWith(_._2>_._2).take(k)
     }
 
-    // neighbors.mapValues(x=> x._.sortWith(_._2>_._2).take(k))
-    neighbors.foldLeft(Map[Int, Seq[((Int, Int), Double)]]()) {
-      (acc, a) => {
-        acc+(a._1 -> a._2.sortWith(_._2>_._2).take(k))
-      }
-    }
+    // val neighbors = ratings.map(_.user).toSet.toList.combinations(2).map{ case List(a, b) => (a, b) }.toSeq.foldLeft(
+    //   Map[Int, Seq[((Int, Int), Double)]]()){
+    //   (acc, a) => {
+    //     acc+(
+    //       a._1 -> (((a, similarityFunction(a._1, a._2))) +: acc.getOrElse(a._1, Seq())), 
+    //       a._2 -> ((((a._2,a._1), similarityFunction(a._1,a._2)))+:acc.getOrElse(a._2, Seq())))
+    //   }
+    // }
+
+    // // neighbors.mapValues(x=> x._.sortWith(_._2>_._2).take(k))
+    // neighbors.foldLeft(Map[Int, Seq[((Int, Int), Double)]]()) {
+    //   (acc, a) => {
+    //     acc+(a._1 -> a._2.sortWith(_._2>_._2).take(k))
+    //   }
+    // }
     // neighbors.transform{(key, value) => value.sortWith(_._2>_._2).take(k)}
   } 
 
   def getSimilarity (ratings : Seq[Rating], k : Int) : (Int, Int) => Double = {
-    val neighbors = getNeighbors(ratings, k)
-    (u,v) => neighbors.getOrElse(u,Nil).toMap.getOrElse((u,v), 0.0)
+    val allNeighbors = getNeighbors(ratings, k)
+    (u,v) => allNeighbors(u).toMap.getOrElse(v, 0.0)
+    // (u,v) => neighbors.getOrElse(u,Nil).toMap.getOrElse((u,v), 0.0)
   }
 
   def weightedSumDevKNN (ratings : Seq[Rating], k : Int) : (Int, Int) => Double = {
 
     // find k-nearest neighbors per user
-    val usersNeighbors = getNeighbors(ratings, k)
+    val allNeighbors = getNeighbors(ratings, k)
     
     val normalizedDeviations = computeNormalizeDeviation(ratings)
     //var ratedI = computeRatedI(ratings)
 
     (u,i) => {
-      val neighbors = usersNeighbors.getOrElse(u, Nil).toMap
-      val ssSum = neighbors.mapValues(_.abs).values.sum
+      val neighbors = allNeighbors(u)
+      val ssSum = neighbors.map(_._2.abs).sum
       if (ssSum !=0) {
-        neighbors.map(x=> x._2*normalizedDeviations.getOrElse((x._1._2,i), 0.0)).sum/ssSum
+        neighbors.map(x=> x._2*normalizedDeviations.getOrElse((x._1,i), 0.0)).sum/ssSum
       } else 0.0
       
     }
