@@ -143,7 +143,7 @@ object Baseline extends App {
   }
 
   /**
-  * Compute the mean Absolute Error of a predictor passed as parameter
+  * Compute the Mean Absolute Error of a predictor passed as parameter
   * @param predictor a rating prediction function taking into parameter a user and an item 
   *   and returns prediction of rating for such pai
   * @param real Sequence of ratings to evaluate predictor on
@@ -180,7 +180,7 @@ object Baseline extends App {
 
 
   /**
-  * Compute the global average rating of sequence passed as parametr
+  * Compute the global average rating of sequence passed as parameter
   * @param ratings a sequence of ratings
   * @return average rating
   */
@@ -254,7 +254,7 @@ object Baseline extends App {
     // map (user, item) to its deviation
     ratings.map(
       x=>{
-        // user's average rating of global average rating if not in map
+        // user's average rating or global average rating if not in map
         val userAvg = usersAvgValue.getOrElse(x.user,globalAvgValue)
         // compute deviation
         Rating(

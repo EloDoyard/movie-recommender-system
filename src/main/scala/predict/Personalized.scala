@@ -67,7 +67,7 @@ object Personalized extends App {
         ),
         "P.1" -> ujson.Obj(
           "1.PredUser1Item1" -> ujson.Num(predictor1Sim(1,1)), // Prediction of item 1 for user 1 (similarity 1 between users)
-          "2.OnesMAE" -> ujson.Num(0.0)//MAE(predictor1Sim, test))         // MAE when using similarities of 1 between all users
+          "2.OnesMAE" -> ujson.Num(MAE(predictor1Sim, test))         // MAE when using similarities of 1 between all users
         ),
         "P.2" -> ujson.Obj(
           "1.AdjustedCosineUser1User2" -> ujson.Num(ACSim(2, 1)), // Similarity between user 1 and user 2 (adjusted Cosine)
