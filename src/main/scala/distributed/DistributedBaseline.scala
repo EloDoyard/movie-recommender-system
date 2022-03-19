@@ -167,7 +167,7 @@ object DistributedBaseline extends App {
   * @param ratings a RDD of ratings
   * @return map (user, item) to deviation of its rating
   */
-  def getNormalizedDev(ratings : RDD[Rating]) : Map[(Int,Int), Double] = {
+  def getNormalizedDev(ratings : RDD[Rating]) : RDD[(Int, (Int,Double))] = {
     // global average rating
     val globalAvg = getGlobalAvg(ratings)
     // map of average rating per user
@@ -178,9 +178,8 @@ object DistributedBaseline extends App {
         // user's average rating or global average rating if user not in map
         val userAvg = usersAvg.getOrElse(x.user, globalAvg)
         // compute deviation
-        Rating(
-        x.user, x.item, ((x.rating-userAvg)/scale(x.rating, userAvg))
-    )}}.groupBy(x=>(x.user, x.item)).mapValues(x=> x.toSeq.map(_.rating).head).collect().toMap
+        (x.item, (1,(x.rating-userAvg)/scale(x.rating, userAvg)))
+    }}//.groupBy(x=>(x.user, x.item)).mapValues(x=> x.toSeq.map(_.rating).head).collect().toMap
   }
 
   /**
@@ -189,14 +188,17 @@ object DistributedBaseline extends App {
   * @return map item to its average deviation
   */
   def getItemsAvgDev (ratings : RDD[Rating]) : Map[Int,Double] = {
-    // map of (user, item) to its normalized deviation 
-    val normalizedDevs = getNormalizedDev(ratings)
+     // global average rating
+    val globalAvg = getGlobalAvg(ratings)
+    // map of average rating per user
+    val usersAvg = getUsersAvg(ratings)
+
+    // val normalizedDevs = 
+    getNormalizedDev(ratings).reduceByKey((acc,a)=>(acc._1+a._1, acc._2+a._2)).mapValues(x=>x._2/x._1).collect().toMap
     // RDD of Ratings where the ratings is the normalized deviation of the original rating
-    val deviation = ratings.map(x=>Rating(x.user, x.item, normalizedDevs.getOrElse((x.user, x.item), 0.0)))
+    // val deviation = ratings.map(x=>Rating(x.user, x.item, normalizedDevs.getOrElse((x.user, x.item), 0.0)))
     // map items to its average deviation
-    deviation.map{
-      case x : Rating => (x.item, (1, x.rating))
-    }.reduceByKey((acc,a)=>(acc._1+a._1, acc._2+a._2)).mapValues(x=>x._2/x._1).collect().toMap
+    // deviation
  }
 
  /**

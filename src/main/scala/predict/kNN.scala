@@ -94,7 +94,8 @@ object kNN extends App {
     }
   }
 
-  println(predictor(train)(getSimilarity(train, 50))(1,1))
+  println(predictKNN(train, 50)(1,1))
+  println(predictor(train)(getSimilarity(train, 50, adjustedCosineSimilarityFunction(train)))(1,1))
   // println(predictKNN(train, 50)(4,5))
   // println(predictKNN(train, 50)(3,200))
   // println(predictKNN(train, 50)(7,10))
@@ -114,7 +115,8 @@ object kNN extends App {
     u => {
       var uNeighbors = allNeighbors.getOrElse(u, Nil)
       if (uNeighbors.isEmpty) {
-        uNeighbors = (allUsers-u).toSeq.map(x=>(x, similarityFunction(u,x))).sortWith(_._2>_._2).take(k)
+        val others = (allUsers- u).toSeq
+        uNeighbors = others.map(x=>(x, similarityFunction(u,x))).sortBy(_._2)(Ordering[Double].reverse).take(k)
         allNeighbors = allNeighbors+(u-> uNeighbors)
       }
       uNeighbors
@@ -139,36 +141,122 @@ object kNN extends App {
     // neighbors.transform{(key, value) => value.sortWith(_._2>_._2).take(k)}
   } 
 
-  def getSimilarity (ratings : Seq[Rating], k : Int) : (Int, Int) => Double = {
-    val allNeighbors = getNeighbors(ratings, k)
-    (u,v) => allNeighbors(u).toMap.getOrElse(v, 0.0)
-    // (u,v) => neighbors.getOrElse(u,Nil).toMap.getOrElse((u,v), 0.0)
+  def getSimilarity (ratings : Seq[Rating], k : Int, sim: (Int, Int)=> Double) : (Int, Int) => Double = {
+    val nn = kNearestNeighbours(train, k, sim)
+    (user1: Int, user2: Int) => {
+      nn(user1).map(x=>{
+        if (x._1==user2){x._2}
+        else {0.0}
+        }).sum
+    }
+  }
+
+  def kNearestNeighbours(train: Seq[Rating], k: Int,  sim: (Int, Int)=> Double): Int => List[(Int, Double)] = {
+    val allUsers = train.map(x=>x.user).toSet
+    var map = Map[Int, List[(Int, Double)]]() // map that will act as a local cache
+    (user: Int )=>{
+      var neighbours = map.getOrElse(user, Nil)
+      if (neighbours.length == 0){
+        val allOthers = (allUsers-user).toList
+        neighbours = allOthers.map(x=> (x, sim(user, x))).sortBy(_._2)(Ordering[Double].reverse).take(k)
+        map = map +(user-> neighbours)
+      }
+      neighbours
+    }
   }
 
   def weightedSumDevKNN (ratings : Seq[Rating], k : Int) : (Int, Int) => Double = {
 
+    val globalAvgValue = globalAvg(train)
     // find k-nearest neighbors per user
     val allNeighbors = getNeighbors(ratings, k)
     
-    val normalizedDeviations = computeNormalizeDeviation(ratings)
+    // val normalizedDeviations = computeNormalizeDeviation(ratings)
+    val simFunction = getSimilarity(ratings, k, adjustedCosineSimilarityFunction(train))
     //var ratedI = computeRatedI(ratings)
+    val usersAvgValue = usersAvg(train)
 
-    (u,i) => {
-      val neighbors = allNeighbors(u)
+    val ratingsByItems = train.groupBy(_.item)
+
+    val usersItem = train.groupBy(_.item)
+
+    (u : Int,i : Int) => {
+      // val usersTemp = ratingsByItems.getOrElse(item, Array[Rating]())
+      val users = usersItem.getOrElse(i, Array[Rating]())
+
+      val userAvg = usersAvgValue.getOrElse(u, globalAvgValue)
+
+      val neighbors = allNeighbors(u).toMap
+
+      // users that rated this item
+      // println(users)
+      // val simVal = temp.map(x=> {
+      //   val xAvg = usersAvgValue.getOrElse(x.user, globalAvgValue)
+      //   ((x.rating-xAvg)/scale(x.rating, xAvg), simFunction(x.user, u))
+      // })
+
+      val simVal = users.map(x=> {
+        val avgU = usersAvgValue.getOrElse(x.user, globalAvgValue)
+        ((x.rating-avgU)/scale(x.rating, avgU), simFunction(u, x.user))
+      })
+
+      val ssSum = simVal.foldLeft((0.0,0.0)) {
+        (acc, a) => {
+          (acc._1+a._1*a._2, acc._2+a._2.abs)
+        }
+      }
       // println(neighbors)
-      val ssSum = neighbors.map(_._2.abs).sum
-      if (ssSum !=0) {
-        neighbors.map(x=> x._2*normalizedDeviations.getOrElse((x._1, i), 0.0)).sum/ssSum
+      // val ssSum = neighbors.map(_._2.abs).sum
+      // println(ssSum)
+      // println(neighbors)
+      if (ssSum._2 >0) {
+        ssSum._1/ssSum._2
+        // neighbors.map(x=> x._2*normalizedDeviations.getOrElse((x._1, i), 0.0)).sum/ssSum
       } else 0.0
       
     }
-  }
+    }
+    // // Compute mandatory values for the predictions
+    // val ratingsByItems = train.groupBy(_.item)
+    // val usAvgs = usersAvg(train)
+    // val globalAvgValue = globalAvg(train)
 
-  def predictor(train: Seq[Rating])(sim: ((Int, Int)=> Double)): (Int, Int)=> Double = {
+    // val sim = getSimilarity(ratings, k, adjustedCosineSimilarityFunction(train))
+   
+    // // val sim = getadjustedCosineSimilarityFunction(train)
+    
+    // (user: Int, item: Int)=> {
+    //   // user that rated this item
+    //   val users = ratingsByItems.getOrElse(item, Array[Rating]())
+    //   print(users.getClass)
+
+    //   // get average rating value for this user or the global average if the user didn't rate anything in the train set
+    //   val avg = usAvgs.getOrElse(user, globalAvgValue)
+
+    //   // get similarity with current user and the rating 
+    //   val simVal = users.map(x=> {
+    //     val avgU = usAvgs.getOrElse(x.user, globalAvgValue)
+    //     ((x.rating-avgU)/scale(x.rating, avgU), sim(user, x.user))
+    //   })
+
+    //   // Compute the denominator as well as the numerator of the similarity between the two useres 
+    //   val sumSim = simVal.foldLeft((0.0, 0.0)){
+    //     (acc, x)=>{
+    //       (acc._1 + x._1*x._2, acc._2 + x._2.abs)
+    //     }
+    //   }
+    //   // compute the prediction
+    //   if (sumSim._2!=0) sumSim._1/sumSim._2 else 0.0
+    // }
+  // }
+
+  def predictor(train: Seq[Rating]) (sim: ((Int, Int)=> Double)) : (Int, Int)=> Double = {
     // Compute mandatory values for the predictions
     val ratingsByItems = train.groupBy(_.item)
     val usAvgs = usersAvg(train)
     val globalAvgValue = globalAvg(train)
+
+    // val sim = getadjustedCosineSimilarityFunction(train)
     
     (user: Int, item: Int)=> {
       // user that rated this item 
@@ -196,17 +284,17 @@ object kNN extends App {
   }
 
 
-  // def predictKNN(ratings : Seq[Rating], k : Int) : (Int, Int)=> Double = {
-  //   val globalAvgValue = globalAvg(ratings)
-  //   val usersAvgValue = usersAvg(ratings)
+  def predictKNN(ratings : Seq[Rating], k : Int) : (Int, Int)=> Double = {
+    val globalAvgValue = globalAvg(ratings)
+    val usersAvgValue = usersAvg(ratings)
 
-  //   val wsd = weightedSumDevKNN(ratings, k)
-  //   (u,i) => {
-  //     var userAvg = usersAvgValue.getOrElse(u, globalAvgValue) 
-  //     var userWSD = wsd(u, i)
-  //     userAvg+userWSD*scale((userAvg+userWSD), userAvg)
-  //   }
-  // }
+    val wsdKNN = weightedSumDevKNN(ratings, k)
+    (u,i) => {
+      var userAvg = usersAvgValue.getOrElse(u, globalAvgValue) 
+      var userWSD = wsdKNN(u, i)
+      userAvg+userWSD*scale(userAvg+userWSD, userAvg)
+    }
+  }
 
   println("")
   spark.close()
