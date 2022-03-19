@@ -70,7 +70,7 @@ object Recommender extends App {
     case None => ; 
     case Some(jsonFile) => {
       val augmented = data.union(personal)
-      println(augmented.size)
+      // println(augmented.size)
       val answers = ujson.Obj(
         "Meta" -> ujson.Obj(
           "data" -> conf.data(),
@@ -93,30 +93,22 @@ object Recommender extends App {
     }
   }
 
-  // implicit object PredictionOrd extends math.Ordering[(Int, Double)] {
-  //   def compare (x:(Int, Double), y:(Int, Double)):Int = {
-  //     if (x._2==y._2) {
-  //       1 if x._1<=y._1 else -1
-  //     } else {
-  //       1 if x._2<y._2 else -1
-  //     }
-  //   }
-  // }
-
   def recommendations (ratings : Seq[Rating], k : Int) : (Int, Int) => Seq[(Int, Double)] = {
     val knn = predictKNN(ratings, k)
     // println(knn.getClass)
+
+    val order = (x:(Int, Double), y:(Int, Double)) => {
+      if (x._2 == y._2) {
+        x._1<y._1
+      } else {
+        x._2>y._2
+      }
+    }
     (user : Int, n : Int) => {
       val notRated = ratings.map(_.item).toSet.diff(ratings.filter(x=> x.user == user).map(_.item).toSet)
-      // println(notRated.getClass)
-      // val predictions = notRated.toSeq.map(x : Int => (x, knn(user,x)))
+      val predictions = notRated.toSeq.map(x=> (x, knn(user,x)))
 
-      // Sorting.stableSort(predictions, (x:(Int, Double),y:(Int, Double)) => x._2>y._2)
-      // Sorting.stableSort(predictions, (x:(Int, Double),y:(Int, Double))=> x._1<y._1)
-      // // Sorting.quickSort(predictions)(PredictionOrd).take(n)
-      // // Sorting.quickSort(predictions)(Ordering[(Int, Double)].on(x=> (x._2, x._1)))
-      // predictions.take(n)
-      Seq[(Int, Double)]()
+      predictions.sortWith(order).take(n)
     }
     
 
