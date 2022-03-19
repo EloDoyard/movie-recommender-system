@@ -9,10 +9,6 @@ import org.apache.log4j.Logger
 import org.apache.log4j.Level
 
 import shared.predictions._
-import scala.util.Sorting
-import predict.kNN._
-import predict.Baseline._
-import predict.Personalized._
 
 class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val data = opt[String](required = true)
@@ -77,13 +73,16 @@ object Recommender extends App {
           "personal" -> conf.personal()
         ),
         "R.1" -> ujson.Obj(
-          "PredUser1Item1" -> ujson.Num(predictKNN(augmented, 300)(1,1)) //0.0) // Prediction for user 1 of item 1
+          "PredUser1Item1" -> ujson.Num(predictor(augmented, weightedSumDevKNN(augmented, 300, adjustedCosineSimilarityFunction(augmented)))(1,1)) // Prediction for user 1 of item 1
         ),
           // IMPORTANT: To break ties and ensure reproducibility of results,
           // please report the top-3 recommendations that have the smallest
           // movie identifier.
 
-        "R.2" -> recommendations(augmented, 300)(944, 3).map(x => ujson.Arr(x._1, movieNames(x._1), x._2))
+        "R.2" ->   recommendations(
+          augmented, predictor(augmented, 
+          weightedSumDevKNN(augmented, 300, adjustedCosineSimilarityFunction(augmented)))
+          )(944, 3).map(x => ujson.Arr(x._1, movieNames(x._1), x._2))
        )
       val json = write(answers, 4)
 
@@ -92,28 +91,6 @@ object Recommender extends App {
       printToFile(json, jsonFile)
     }
   }
-
-  def recommendations (ratings : Seq[Rating], k : Int) : (Int, Int) => Seq[(Int, Double)] = {
-    val knn = predictKNN(ratings, k)
-    // println(knn.getClass)
-
-    val order = (x:(Int, Double), y:(Int, Double)) => {
-      if (x._2 == y._2) {
-        x._1<y._1
-      } else {
-        x._2>y._2
-      }
-    }
-    (user : Int, n : Int) => {
-      val notRated = ratings.map(_.item).toSet.diff(ratings.filter(x=> x.user == user).map(_.item).toSet)
-      val predictions = notRated.toSeq.map(x=> (x, knn(user,x)))
-
-      predictions.sortWith(order).take(n)
-    }
-    
-
-  }
-
 
   println("")
   spark.close()
