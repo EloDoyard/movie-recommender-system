@@ -142,7 +142,7 @@ object kNN extends App {
   } 
 
   def getSimilarity (ratings : Seq[Rating], k : Int, sim: (Int, Int)=> Double) : (Int, Int) => Double = {
-    val nn = kNearestNeighbours(train, k, sim)
+    val nn = kNearestNeighbours(ratings, k, sim)
     (user1: Int, user2: Int) => {
       nn(user1).map(x=>{
         if (x._1==user2){x._2}
@@ -167,44 +167,39 @@ object kNN extends App {
 
   def weightedSumDevKNN (ratings : Seq[Rating], k : Int) : (Int, Int) => Double = {
 
-    val globalAvgValue = globalAvg(train)
+    val globalAvgValue = globalAvg(ratings)
     // find k-nearest neighbors per user
     val allNeighbors = getNeighbors(ratings, k)
     
     // val normalizedDeviations = computeNormalizeDeviation(ratings)
-    val simFunction = getSimilarity(ratings, k, adjustedCosineSimilarityFunction(train))
+    val simFunction = getSimilarity(ratings, k, adjustedCosineSimilarityFunction(ratings))
     //var ratedI = computeRatedI(ratings)
-    val usersAvgValue = usersAvg(train)
+    val usersAvgValue = usersAvg(ratings)
 
-    val ratingsByItems = train.groupBy(_.item)
+    val ratingsByItems = ratings.groupBy(_.item)
 
-    val usersItem = train.groupBy(_.item)
+    // val usersItem = ratings.groupBy(_.item)
 
     (u : Int,i : Int) => {
       // val usersTemp = ratingsByItems.getOrElse(item, Array[Rating]())
-      val users = usersItem.getOrElse(i, Array[Rating]())
+      val users = ratingsByItems.getOrElse(i, Array[Rating]())
+      println(users.getClass)
 
       val userAvg = usersAvgValue.getOrElse(u, globalAvgValue)
 
       val neighbors = allNeighbors(u).toMap
 
-      // users that rated this item
-      // println(users)
-      // val simVal = temp.map(x=> {
-      //   val xAvg = usersAvgValue.getOrElse(x.user, globalAvgValue)
-      //   ((x.rating-xAvg)/scale(x.rating, xAvg), simFunction(x.user, u))
+
+      // val simVal = users.map(x=> {
+      //   val avgU = usersAvgValue.getOrElse(x.user, globalAvgValue)
+      //   ((x.rating-avgU)/scale(x.rating, avgU), simFunction(u, x.user))
       // })
 
-      val simVal = users.map(x=> {
-        val avgU = usersAvgValue.getOrElse(x.user, globalAvgValue)
-        ((x.rating-avgU)/scale(x.rating, avgU), simFunction(u, x.user))
-      })
-
-      val ssSum = simVal.foldLeft((0.0,0.0)) {
-        (acc, a) => {
-          (acc._1+a._1*a._2, acc._2+a._2.abs)
-        }
-      }
+      val ssSum = (0.0,0.0) ///simVal.foldLeft((0.0,0.0)) {
+      //   (acc, a) => {
+      //     (acc._1+a._1*a._2, acc._2+a._2.abs)
+      //   }
+      // }
       // println(neighbors)
       // val ssSum = neighbors.map(_._2.abs).sum
       // println(ssSum)
