@@ -200,7 +200,7 @@ object Personalized extends App {
   * Compute user-specific weighted-sum deviation function as defined in the handout, equation 7
   * @param ratings a sequence of ratings
   * @param similarityFunction the similarity function to use when computing the weighted sum
-  * @return map item to its average deviation
+  * @return map each (user, item) to its weighted-sum deviation
   */
   def weightedSumDeviation (ratings : Seq[Rating], similarityFunction : (Int,Int)=>Double) : (Int, Int) => Double = {
     // Map (user, item) to its normalized deviation rating
@@ -224,7 +224,7 @@ object Personalized extends App {
   }
 
   /**
-  * Personanlized Predictor predicting for (user, item) the baseline prediction 
+  * Personnalized Predictor predicting for (user, item) the baseline prediction 
   *   and using the user-specific weighted-sum deviation as deviation
   * @param ratings a sequence of ratings
   * @return function that maps (user, item) to its prediction

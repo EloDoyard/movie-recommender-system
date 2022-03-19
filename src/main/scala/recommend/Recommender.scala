@@ -109,14 +109,14 @@ object Recommender extends App {
     (user : Int, n : Int) => {
       val notRated = ratings.map(_.item).toSet.diff(ratings.filter(x=> x.user == user).map(_.item).toSet)
       // println(notRated.getClass)
-      val predictions = notRated.toSeq.map(x : Int => (x, knn(user,x)))
+      // val predictions = notRated.toSeq.map(x : Int => (x, knn(user,x)))
 
-      Sorting.stableSort(predictions, (x:(Int, Double),y:(Int, Double)) => x._2>y._2)
-      Sorting.stableSort(predictions, (x:(Int, Double),y:(Int, Double))=> x._1<y._1)
-      // Sorting.quickSort(predictions)(PredictionOrd).take(n)
-      // Sorting.quickSort(predictions)(Ordering[(Int, Double)].on(x=> (x._2, x._1)))
-      predictions.take(n)
-      // Seq[(Int, Double)]()
+      // Sorting.stableSort(predictions, (x:(Int, Double),y:(Int, Double)) => x._2>y._2)
+      // Sorting.stableSort(predictions, (x:(Int, Double),y:(Int, Double))=> x._1<y._1)
+      // // Sorting.quickSort(predictions)(PredictionOrd).take(n)
+      // // Sorting.quickSort(predictions)(Ordering[(Int, Double)].on(x=> (x._2, x._1)))
+      // predictions.take(n)
+      Seq[(Int, Double)]()
     }
     
 
