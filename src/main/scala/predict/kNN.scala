@@ -66,10 +66,10 @@ object kNN extends App {
           "3.Measurements" -> conf.num_measurements()
         ),
         "N.1" -> ujson.Obj(
-          "1.k10u1v1" -> ujson.Num(0.0),//getSimilarity(train, 10)(1,1)), // Similarity between user 1 and user 1 (k=10)
-          "2.k10u1v864" -> ujson.Num(0.0),//getSimilarity(train, 10)(1,864)), // Similarity between user 1 and user 864 (k=10)
-          "3.k10u1v886" -> ujson.Num(0.0),//getSimilarity(train, 10)(1,886)), // Similarity between user 1 and user 886 (k=10)
-          "4.PredUser1Item1" -> ujson.Num(0.0)//predictKNN(train, 10)(1,1))//Prediction of item 1 for user 1 (k=10)
+          "1.k10u1v1" -> ujson.Num(getSimilarity(train, 10, adjustedCosineSimilarityFunction(train))(1,1)), // Similarity between user 1 and user 1 (k=10)
+          "2.k10u1v864" -> ujson.Num(getSimilarity(train, 10, adjustedCosineSimilarityFunction(train))(1,864)), // Similarity between user 1 and user 864 (k=10)
+          "3.k10u1v886" -> ujson.Num(getSimilarity(train, 10, adjustedCosineSimilarityFunction(train))(1,886)), // Similarity between user 1 and user 886 (k=10)
+          "4.PredUser1Item1" -> ujson.Num(predictKNN(train, 10)(1,1))//Prediction of item 1 for user 1 (k=10)
         ),
         "N.2" -> ujson.Obj(
           "1.kNN-Mae" -> List(10,30,50,100,200,300,400,800,943).map(k => 
@@ -176,30 +176,36 @@ object kNN extends App {
     //var ratedI = computeRatedI(ratings)
     val usersAvgValue = usersAvg(ratings)
 
-    val ratingsByItems = ratings.groupBy(_.item)
+    var ratingsByItems = ratings.groupBy(_.item)
 
     // val usersItem = ratings.groupBy(_.item)
 
     (u : Int,i : Int) => {
       // val usersTemp = ratingsByItems.getOrElse(item, Array[Rating]())
-      val users = ratingsByItems.getOrElse(i, Array[Rating]())
-      println(users.getClass)
+      val users = ratingsByItems.getOrElse(i, Seq[Rating]())
+      // println(users)
 
       val userAvg = usersAvgValue.getOrElse(u, globalAvgValue)
 
       val neighbors = allNeighbors(u).toMap
 
-
-      // val simVal = users.map(x=> {
-      //   val avgU = usersAvgValue.getOrElse(x.user, globalAvgValue)
-      //   ((x.rating-avgU)/scale(x.rating, avgU), simFunction(u, x.user))
+      // users that rated this item
+      // println(users)
+      // val simVal = temp.map(x=> {
+      //   val xAvg = usersAvgValue.getOrElse(x.user, globalAvgValue)
+      //   ((x.rating-xAvg)/scale(x.rating, xAvg), simFunction(x.user, u))
       // })
 
-      val ssSum = (0.0,0.0) ///simVal.foldLeft((0.0,0.0)) {
-      //   (acc, a) => {
-      //     (acc._1+a._1*a._2, acc._2+a._2.abs)
-      //   }
-      // }
+      val simVal = users.map(x=> {
+        val avgU = usersAvgValue.getOrElse(x.user, globalAvgValue)
+        ((x.rating-avgU)/scale(x.rating, avgU), simFunction(u, x.user))
+      })
+
+      val ssSum = simVal.foldLeft((0.0,0.0)) {
+        (acc, a) => {
+          (acc._1+a._1*a._2, acc._2+a._2.abs)
+        }
+      }
       // println(neighbors)
       // val ssSum = neighbors.map(_._2.abs).sum
       // println(ssSum)
