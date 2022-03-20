@@ -216,7 +216,7 @@ package object predictions
     // map of users to its average rating
     val usersAvgValue = usersAvg(ratings)
     // map of items to its item average deviation rating
-    val itemsAvgDevValue = itemsAvgDev(ratings)
+    val itemsAvgDevValue = computeItemAvgDev(ratings)
     // global average rating
     val globalAvgValue = globalAvg(ratings)
     
@@ -231,7 +231,7 @@ package object predictions
         // user's average rating or global average rating if not in map
         val userAvg = usersAvgValue.getOrElse(user, globalAvgValue)
         // item's average deviation or 0 if not in map
-        val itemAvgDev = itemsAvgDevValue.getOrElse(item, 0.0)  
+        val itemAvgDev = itemsAvgDevValue(user,item) 
         // baseline prediction
         pred = (userAvg+itemAvgDev*scale((userAvg+itemAvgDev), userAvg))
         // add value to cache
