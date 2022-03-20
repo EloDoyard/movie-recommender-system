@@ -67,13 +67,15 @@ object kNN extends App {
           "1.k10u1v1" -> ujson.Num(getSimilarity(train, 10, adjustedCosineSimilarityFunction(train))(1,1)), // Similarity between user 1 and user 1 (k=10)
           "2.k10u1v864" -> ujson.Num(getSimilarity(train, 10, adjustedCosineSimilarityFunction(train))(1,864)), // Similarity between user 1 and user 864 (k=10)
           "3.k10u1v886" -> ujson.Num(getSimilarity(train, 10, adjustedCosineSimilarityFunction(train))(1,886)), // Similarity between user 1 and user 886 (k=10)
-          "4.PredUser1Item1" -> ujson.Num(predictor(train, weightedSumDevKNN(train, 10, adjustedCosineSimilarityFunction(train)))(1,1)) //Prediction of item 1 for user 1 (k=10)
+          "4.PredUser1Item1" -> ujson.Num(predictor(train, weightedSumDeviation(train, getSimilarity(
+              train, 10, adjustedCosineSimilarityFunction(train))))(1,1)) //Prediction of item 1 for user 1 (k=10)
         ),
         "N.2" -> ujson.Obj(
           "1.kNN-Mae" -> List(10,30,50,100,200,300,400,800,943).map(k => 
               List(
                 k,
-                MAE(predictor(train, weightedSumDevKNN(train, k, adjustedCosineSimilarityFunction(train))), test) // Compute MAE
+                MAE(predictor(train, weightedSumDeviation(train, getSimilarity(
+              train, k, adjustedCosineSimilarityFunction(train)))), test) // Compute MAE
               )
           ).toList
         ),

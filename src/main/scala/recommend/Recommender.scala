@@ -73,7 +73,9 @@ object Recommender extends App {
           "personal" -> conf.personal()
         ),
         "R.1" -> ujson.Obj(
-          "PredUser1Item1" -> ujson.Num(predictor(augmented, weightedSumDevKNN(augmented, 300, adjustedCosineSimilarityFunction(augmented)))(1,1)) // Prediction for user 1 of item 1
+          "PredUser1Item1" -> ujson.Num(predictor(
+            augmented, weightedSumDeviation(augmented, getSimilarity(
+              augmented, 300, adjustedCosineSimilarityFunction(augmented))))(1,1)) // Prediction for user 1 of item 1
         ),
           // IMPORTANT: To break ties and ensure reproducibility of results,
           // please report the top-3 recommendations that have the smallest
@@ -81,7 +83,8 @@ object Recommender extends App {
 
         "R.2" ->   recommendations(
           augmented, predictor(augmented, 
-          weightedSumDevKNN(augmented, 300, adjustedCosineSimilarityFunction(augmented)))
+          weightedSumDeviation(augmented, getSimilarity(
+            augmented, 300, adjustedCosineSimilarityFunction(augmented))))
           )(944, 3).map(x => ujson.Arr(x._1, movieNames(x._1), x._2))
        )
       val json = write(answers, 4)
