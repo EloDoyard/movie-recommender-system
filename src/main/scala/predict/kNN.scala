@@ -40,9 +40,8 @@ object kNN extends App {
 
 
   val measurements = (1 to conf.num_measurements()).map(x => timingInMs(() => {
-    //MeanAbsoluteError(predictKNN(train, 300),test)
-    Thread.sleep(1000)
-    42
+    MAE(predictor(train, weightedSumDeviation(train, getSimilarity(
+              train, 300, adjustedCosineSimilarityFunction(train)))), test)
   }))
   val timings = measurements.map(t => t._2) // Retrieve the timing measurements
 

@@ -5,12 +5,12 @@
         "3.Measurements": 0
     },
     "P.1": {
-        "1.PredUser1Item1": 4.046819980619528,
-        "2.OnesMAE": 0.7604467914538642
+        "1.PredUser1Item1": 4.046819980619529,
+        "2.OnesMAE": 0.7604467914538644
     },
     "P.2": {
-        "1.AdjustedCosineUser1User2": 0.07303711860794568,
-        "2.PredUser1Item1": 4.087027258769361,
+        "1.AdjustedCosineUser1User2": 0.0730371186079457,
+        "2.PredUser1Item1": 4.08702725876936,
         "3.AdjustedCosineMAE": 0.7372314455896454
     },
     "P.3": {

@@ -455,7 +455,7 @@ package object predictions
         // number of items rated by both users
         val sizeIntersection = ratedByBoth.size 
         // compute jaccard coefficient
-        coeff = sizeIntersection/(uRatings.size+vRatings.size-sizeIntersection)
+        coeff = sizeIntersection.toDouble/(uRatings.size+vRatings.size-sizeIntersection)
         // update cache
         coefficients = coefficients+((u,v)-> coeff)+((v,u)-> coeff)
       }

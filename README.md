@@ -165,7 +165,7 @@ before running on cluster.
 ### Upload jar on Cluster 
 
 ````
-    scp target/scala-2.11/m1_yourid-assembly-1.0.jar <username>@iccluster028.iccluster.epfl.ch:~
+    scp target/scala-2.11/m1_yourid-assembly-1.0.jar doyard@iccluster028.iccluster.epfl.ch:~
 ````
 
 ### Run on Cluster
